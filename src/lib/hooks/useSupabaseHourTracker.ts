@@ -87,6 +87,28 @@ export const useSupabaseHourTracker = () => {
       }
     }
 
+    // Additional validation for CE entries
+    if (formData.type === 'ce') {
+      if (!formData.subtype) {
+        alert('Please select a CE type');
+        return false;
+      }
+      if (!formData.ceCategory) {
+        alert('Please select a CE category');
+        return false;
+      }
+      if (!formData.deliveryFormat) {
+        alert('Please select a delivery format');
+        return false;
+      }
+    }
+
+    // Validation for non-CE entries
+    if (formData.type !== 'ce' && !formData.subtype) {
+      alert('Please select a subtype');
+      return false;
+    }
+
     if (!editingDate) return false;
 
     try {

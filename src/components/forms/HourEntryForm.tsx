@@ -75,7 +75,7 @@ export const HourEntryForm = ({
               const newType = e.target.value as FormData['type'];
               updateFormData({ 
                 type: newType, 
-                subtype: newType === 'ce' ? 'ce' : '' 
+                subtype: '' 
               });
             }}
             className="w-full border border-pink-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
@@ -109,6 +109,25 @@ export const HourEntryForm = ({
 
         {formData.type === 'ce' && (
           <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {getSubtypeLabel(formData.type)}
+              </label>
+              <select
+                value={formData.subtype}
+                onChange={(e) => updateFormData({ subtype: e.target.value })}
+                className="w-full border border-pink-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                required
+              >
+                <option value="">Select type...</option>
+                {getSubtypeOptions(formData.type).map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 CE Category
