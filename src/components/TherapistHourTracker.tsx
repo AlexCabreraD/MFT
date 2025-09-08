@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Flower2 } from 'lucide-react';
 import { ViewType, CalendarViewType } from '@/lib/types';
-import { useHourTracker } from '@/lib/hooks/useHourTracker';
+import { useSupabaseHourTracker } from '@/lib/hooks/useSupabaseHourTracker';
 import { Header } from './layout/Header';
 import { QuickStats } from './layout/QuickStats';
 import { Footer } from './layout/Footer';
@@ -12,6 +12,8 @@ import { MonthCalendar } from './calendar/MonthCalendar';
 import { WeekCalendar } from './calendar/WeekCalendar';
 import { DayDetails } from './calendar/DayDetails';
 import { AnalyticsView } from './analytics/AnalyticsView';
+import { SupervisionView } from './supervision/SupervisionView';
+import { RequirementsView } from './requirements/RequirementsView';
 
 export const TherapistHourTracker = () => {
   const [view, setView] = useState<ViewType>('calendar');
@@ -28,8 +30,11 @@ export const TherapistHourTracker = () => {
     saveEntry,
     editEntry,
     deleteEntry,
-    progress
-  } = useHourTracker();
+    progress,
+    supervisionData,
+    addSupervisionHours,
+    deleteSupervisionSession
+  } = useSupabaseHourTracker();
 
   const handleTodayClick = () => {
     setSelectedDate(new Date());
@@ -97,6 +102,15 @@ export const TherapistHourTracker = () => {
               </div>
             </div>
           </div>
+        ) : view === 'supervision' ? (
+          <SupervisionView 
+            supervisionData={supervisionData}
+            progress={progress}
+            onAddSupervisionHours={addSupervisionHours}
+            onDeleteSupervisionSession={deleteSupervisionSession}
+          />
+        ) : view === 'requirements' ? (
+          <RequirementsView progress={progress} />
         ) : (
           <AnalyticsView entries={entries} progress={progress} />
         )}

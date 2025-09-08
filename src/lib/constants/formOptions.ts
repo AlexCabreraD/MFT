@@ -4,9 +4,13 @@ export const getSubtypeOptions = (type: string): SubtypeOption[] => {
   switch (type) {
     case 'session':
       return [
-        { value: 'individual', label: 'Individual' },
-        { value: 'family', label: 'Family' },
-        { value: 'couple', label: 'Couple' }
+        { value: 'individual', label: 'Individual Therapy' },
+        { value: 'family', label: 'Family Therapy' },
+        { value: 'couple', label: 'Couple/Marriage Therapy' },
+        { value: 'assessment', label: 'Assessment/Evaluation' },
+        { value: 'consultation', label: 'Consultation' },
+        { value: 'documentation', label: 'Documentation/Case Notes' },
+        { value: 'other', label: 'Other Clinical Activities' }
       ];
     case 'supervision':
       return [
@@ -77,7 +81,11 @@ export const deliveryFormatOptions: DeliveryFormatOption[] = [
     label: 'In-Person'
   },
   {
-    value: 'online',
-    label: 'Online'
+    value: 'online-interactive',
+    label: 'Online Interactive (Live/Real-time)'
+  },
+  {
+    value: 'online-non-interactive',
+    label: 'Online Non-Interactive (Self-paced/Recorded)'
   }
 ];

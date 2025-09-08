@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Calendar, BarChart3 } from 'lucide-react';
+import { Clock, Calendar, BarChart3, Users, BookOpen } from 'lucide-react';
 import { ViewType } from '@/lib/types';
 import { UserButton, useUser } from '@clerk/nextjs';
 
@@ -38,6 +38,17 @@ export const Header = ({ view, onViewChange }: HeaderProps) => {
           Calendar
         </button>
         <button
+          onClick={() => onViewChange('supervision')}
+          className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+            view === 'supervision' 
+              ? 'bg-pink-500 text-white shadow-md' 
+              : 'bg-white text-gray-700 border border-pink-200 hover:bg-pink-50'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          Supervision
+        </button>
+        <button
           onClick={() => onViewChange('analytics')}
           className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
             view === 'analytics' 
@@ -47,6 +58,17 @@ export const Header = ({ view, onViewChange }: HeaderProps) => {
         >
           <BarChart3 className="w-4 h-4" />
           Analytics
+        </button>
+        <button
+          onClick={() => onViewChange('requirements')}
+          className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+            view === 'requirements' 
+              ? 'bg-pink-500 text-white shadow-md' 
+              : 'bg-white text-gray-700 border border-pink-200 hover:bg-pink-50'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          Requirements
         </button>
         </div>
 

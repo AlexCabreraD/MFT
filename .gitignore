@@ -42,3 +42,5 @@ next-env.d.ts
 
 BEST_PRACTICES.md
 .claude
+supabase-schema.sql
+src/lib/utils/supabaseData.ts

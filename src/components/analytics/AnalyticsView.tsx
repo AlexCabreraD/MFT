@@ -18,7 +18,7 @@ export const AnalyticsView = ({ entries, progress }: AnalyticsViewProps) => {
       </div>
 
       {/* Progress Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <ProgressCard
           title="Session Hours"
           currentValue={progress.totalSessionHours}
@@ -38,11 +38,29 @@ export const AnalyticsView = ({ entries, progress }: AnalyticsViewProps) => {
         />
 
         <ProgressCard
+          title="Supervision Hours"
+          currentValue={progress.totalSupervisionHours}
+          targetValue={100}
+          progress={progress.supervisionProgress}
+          color="green"
+          subtitle="Total Required"
+        />
+
+        <ProgressCard
+          title="Video/Audio Supervision"
+          currentValue={progress.videoAudioSupervisionHours}
+          targetValue={25}
+          progress={progress.videoAudioSupervisionProgress}
+          color="blue"
+          subtitle="Review Hours Required"
+        />
+
+        <ProgressCard
           title="Total CE Hours"
           currentValue={progress.ceCycleHours}
           targetValue={40}
           progress={progress.ceProgress}
-          color="blue"
+          color="indigo"
           subtitle="Current Cycle"
         />
 
@@ -51,7 +69,7 @@ export const AnalyticsView = ({ entries, progress }: AnalyticsViewProps) => {
           currentValue={progress.ethicsLawTechHours}
           targetValue={6}
           progress={progress.ethicsLawTechProgress}
-          color="green"
+          color="orange"
           subtitle="CE Required"
         />
 
@@ -60,7 +78,7 @@ export const AnalyticsView = ({ entries, progress }: AnalyticsViewProps) => {
           currentValue={progress.suicidePreventionHours}
           targetValue={2}
           progress={progress.suicidePreventionProgress}
-          color="orange"
+          color="blue"
           subtitle="CE Required"
         />
 
@@ -69,7 +87,7 @@ export const AnalyticsView = ({ entries, progress }: AnalyticsViewProps) => {
           currentValue={progress.mftSpecificHours}
           targetValue={15}
           progress={progress.mftSpecificProgress}
-          color="indigo"
+          color="green"
           subtitle="CE Required (MFT Only)"
         />
       </div>

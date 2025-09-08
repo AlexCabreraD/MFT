@@ -1,4 +1,4 @@
-import { User } from '@clerk/nextjs/server';
+import { UserResource } from '@clerk/types';
 import { EntriesData } from '@/lib/types';
 
 export interface UserAppData {
@@ -7,9 +7,21 @@ export interface UserAppData {
     selectedDate?: string;
     calendarView?: 'month' | 'week';
   };
+  supervisionHours?: {
+    total: number;
+    videoAudio: number;
+    sessions: Array<{
+      date: string;
+      hours: number;
+      hasVideo: boolean;
+      hasAudio: boolean;
+      notes?: string;
+      timestamp: string;
+    }>;
+  };
 }
 
-export const saveToClerkMetadata = async (user: User, data: UserAppData): Promise<void> => {
+export const saveToClerkMetadata = async (user: UserResource, data: UserAppData): Promise<void> => {
   try {
     await user.update({
       unsafeMetadata: {
@@ -23,7 +35,7 @@ export const saveToClerkMetadata = async (user: User, data: UserAppData): Promis
   }
 };
 
-export const loadFromClerkMetadata = (user: User): UserAppData => {
+export const loadFromClerkMetadata = (user: UserResource): UserAppData => {
   try {
     const metadata = user.unsafeMetadata as { appData?: UserAppData };
     return metadata.appData || { entries: {} };
@@ -33,7 +45,7 @@ export const loadFromClerkMetadata = (user: User): UserAppData => {
   }
 };
 
-export const clearClerkMetadata = async (user: User): Promise<void> => {
+export const clearClerkMetadata = async (user: UserResource): Promise<void> => {
   try {
     await user.update({
       unsafeMetadata: {

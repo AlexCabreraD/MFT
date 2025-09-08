@@ -1,4 +1,5 @@
-import { Save, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Save, X, Video, Volume2 } from 'lucide-react';
 import { FormData } from '@/lib/types';
 import { getSubtypeOptions, getSubtypeLabel, ceCategoryOptions, deliveryFormatOptions } from '@/lib/constants/formOptions';
 
@@ -15,8 +16,40 @@ export const HourEntryForm = ({
   onSave, 
   onCancel 
 }: HourEntryFormProps) => {
+  const [reviewedSession, setReviewedSession] = useState(false);
+  const [reviewType, setReviewType] = useState<'video' | 'audio' | ''>('');
+
+  // Initialize local state from formData
+  useEffect(() => {
+    const hasReview = formData.reviewedAudio || formData.reviewedVideo;
+    setReviewedSession(hasReview);
+    if (formData.reviewedVideo) {
+      setReviewType('video');
+    } else if (formData.reviewedAudio) {
+      setReviewType('audio');
+    } else {
+      setReviewType('');
+    }
+  }, [formData.reviewedAudio, formData.reviewedVideo]);
+
   const updateFormData = (updates: Partial<FormData>) => {
     onFormDataChange({ ...formData, ...updates });
+  };
+
+  const handleReviewedSessionChange = (checked: boolean) => {
+    setReviewedSession(checked);
+    if (!checked) {
+      setReviewType('');
+      updateFormData({ reviewedAudio: false, reviewedVideo: false });
+    }
+  };
+
+  const handleReviewTypeChange = (type: 'video' | 'audio') => {
+    setReviewType(type);
+    updateFormData({
+      reviewedVideo: type === 'video',
+      reviewedAudio: type === 'audio'
+    });
   };
 
   return (
@@ -117,25 +150,51 @@ export const HourEntryForm = ({
         )}
 
         {formData.type === 'supervision' && formData.subtype === 'individual' && (
-          <div className="space-y-2">
-            <label className="flex items-center">
+          <div className="space-y-3">
+            <label className="flex items-center space-x-3">
               <input
                 type="checkbox"
-                checked={formData.reviewedAudio}
-                onChange={(e) => updateFormData({ reviewedAudio: e.target.checked })}
-                className="mr-2 text-pink-600 focus:ring-pink-400"
+                checked={reviewedSession}
+                onChange={(e) => handleReviewedSessionChange(e.target.checked)}
+                className="rounded border-pink-300 text-pink-600 focus:ring-pink-500"
               />
-              <span className="text-sm text-gray-700">Reviewed Audio</span>
+              <span className="text-sm font-medium text-gray-700">Reviewed a session?</span>
             </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.reviewedVideo}
-                onChange={(e) => updateFormData({ reviewedVideo: e.target.checked })}
-                className="mr-2 text-pink-600 focus:ring-pink-400"
-              />
-              <span className="text-sm text-gray-700">Reviewed Video</span>
-            </label>
+            
+            {reviewedSession && (
+              <div className="ml-6 space-y-2">
+                <p className="text-sm font-medium text-gray-700">Review Type</p>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="reviewType"
+                      value="video"
+                      checked={reviewType === 'video'}
+                      onChange={(e) => handleReviewTypeChange(e.target.value as 'video')}
+                      className="border-pink-300 text-pink-600 focus:ring-pink-500"
+                    />
+                    <Video className="w-4 h-4 text-pink-600" />
+                    <span className="text-sm text-gray-700">Video review</span>
+                  </label>
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="reviewType"
+                      value="audio"
+                      checked={reviewType === 'audio'}
+                      onChange={(e) => handleReviewTypeChange(e.target.value as 'audio')}
+                      className="border-pink-300 text-pink-600 focus:ring-pink-500"
+                    />
+                    <Volume2 className="w-4 h-4 text-pink-600" />
+                    <span className="text-sm text-gray-700">Audio review</span>
+                  </label>
+                </div>
+                <p className="text-xs text-pink-600">
+                  This session will count toward your 25-hour video/audio review requirement.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

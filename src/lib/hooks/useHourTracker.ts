@@ -3,7 +3,7 @@ import { useUser } from '@clerk/nextjs';
 import { EntriesData, FormData, HourEntry, ProgressStats } from '@/lib/types';
 import { formatDateKey, isToday } from '@/lib/utils/dateUtils';
 import { calculateProgress } from '@/lib/utils/progressUtils';
-import { saveToClerkMetadata, loadFromClerkMetadata } from '@/lib/utils/clerkData';
+import { saveToClerkMetadata, loadFromClerkMetadata, UserAppData } from '@/lib/utils/clerkData';
 
 const defaultFormData: FormData = {
   type: 'session',
@@ -19,6 +19,7 @@ const defaultFormData: FormData = {
 export const useHourTracker = () => {
   const { user } = useUser();
   const [entries, setEntries] = useState<EntriesData>({});
+  const [supervisionData, setSupervisionData] = useState<UserAppData['supervisionHours']>();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [editingDate, setEditingDate] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -30,6 +31,7 @@ export const useHourTracker = () => {
       try {
         const userData = loadFromClerkMetadata(user);
         setEntries(userData.entries || {});
+        setSupervisionData(userData.supervisionHours || { total: 0, videoAudio: 0, sessions: [] });
       } catch (error) {
         console.error('Error loading data:', error);
         // Fallback to localStorage for migration
@@ -46,19 +48,19 @@ export const useHourTracker = () => {
     }
   }, [user]);
 
-  // Save data to Clerk metadata whenever entries change
+  // Save data to Clerk metadata whenever entries or supervision data change
   useEffect(() => {
-    if (user && Object.keys(entries).length > 0) {
+    if (user && (Object.keys(entries).length > 0 || supervisionData)) {
       const saveData = async () => {
         try {
-          await saveToClerkMetadata(user, { entries });
+          await saveToClerkMetadata(user, { entries, supervisionHours: supervisionData });
         } catch (error) {
           console.error('Error saving data:', error);
         }
       };
       saveData();
     }
-  }, [entries, user]);
+  }, [entries, supervisionData, user]);
 
   // Initialize editing for today by default when today is selected
   useEffect(() => {
@@ -154,6 +156,45 @@ export const useHourTracker = () => {
     setEditingIndex(null);
   };
 
+  const addSupervisionHours = (hours: number, hasVideo: boolean, hasAudio: boolean, notes?: string) => {
+    const newSession = {
+      date: formatDateKey(new Date()),
+      hours,
+      hasVideo,
+      hasAudio,
+      notes,
+      timestamp: new Date().toISOString()
+    };
+
+    setSupervisionData(prev => {
+      const updated = prev || { total: 0, videoAudio: 0, sessions: [] };
+      const newTotal = updated.total + hours;
+      const newVideoAudio = updated.videoAudio + (hasVideo || hasAudio ? hours : 0);
+      
+      return {
+        total: newTotal,
+        videoAudio: newVideoAudio,
+        sessions: [...updated.sessions, newSession]
+      };
+    });
+  };
+
+  const deleteSupervisionSession = (index: number) => {
+    setSupervisionData(prev => {
+      if (!prev) return prev;
+      
+      const sessionToDelete = prev.sessions[index];
+      const newTotal = prev.total - sessionToDelete.hours;
+      const newVideoAudio = prev.videoAudio - (sessionToDelete.hasVideo || sessionToDelete.hasAudio ? sessionToDelete.hours : 0);
+      
+      return {
+        total: Math.max(0, newTotal),
+        videoAudio: Math.max(0, newVideoAudio),
+        sessions: prev.sessions.filter((_, i) => i !== index)
+      };
+    });
+  };
+
   const progress: ProgressStats = calculateProgress(entries);
 
   return {
@@ -169,6 +210,9 @@ export const useHourTracker = () => {
     editEntry,
     deleteEntry,
     cancelEdit,
-    progress
+    progress,
+    supervisionData,
+    addSupervisionHours,
+    deleteSupervisionSession
   };
 };
