@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useAuth, useSession } from '@clerk/nextjs'
+import { useSession } from '@clerk/nextjs'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!

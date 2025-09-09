@@ -23,6 +23,11 @@ const defaultFormData: FormData = {
   deliveryFormat: undefined
 };
 
+interface ClerkMetadata {
+  trainingStartDate?: string;
+  [key: string]: unknown;
+}
+
 export const useSupabaseHourTracker = () => {
   const { user } = useUser();
   const supabase = useSupabaseClient();
@@ -63,7 +68,7 @@ export const useSupabaseHourTracker = () => {
   useEffect(() => {
     if (user) {
       try {
-        const clerkMetadata = user.unsafeMetadata as any;
+        const clerkMetadata = user.unsafeMetadata as ClerkMetadata;
         setTrainingStartDate(clerkMetadata?.trainingStartDate);
       } catch (err) {
         console.error('Error loading training start date from Clerk metadata:', err);
@@ -76,7 +81,7 @@ export const useSupabaseHourTracker = () => {
     if (user && trainingStartDate !== undefined) {
       const saveData = async () => {
         try {
-          const existingMetadata = user.unsafeMetadata as any;
+          const existingMetadata = user.unsafeMetadata as ClerkMetadata;
           await user.update({
             unsafeMetadata: {
               ...existingMetadata,
