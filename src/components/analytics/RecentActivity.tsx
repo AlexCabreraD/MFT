@@ -32,7 +32,7 @@ export const RecentActivity = ({ entries }: RecentActivityProps) => {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
       <h3 className="font-medium text-gray-900 mb-4">Recent Activity</h3>
-      <div className="space-y-3">
+      <div className="space-y-3 max-h-80 overflow-y-auto">
         {recentEntries.map((entry, index) => (
           <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
             <div className="flex items-center gap-3">

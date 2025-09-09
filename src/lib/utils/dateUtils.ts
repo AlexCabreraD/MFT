@@ -1,5 +1,8 @@
 export const formatDateKey = (date: Date): string => {
-  return date.toISOString().split('T')[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 export const isToday = (date: Date): boolean => {
@@ -39,14 +42,19 @@ export const calculateTimeProgress = (startDate: string | null) => {
     };
   }
 
+  // Use start of day for consistent calendar day calculations
   const start = new Date(startDate);
-  const now = new Date();
+  start.setHours(0, 0, 0, 0);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
   const twoYearsLater = new Date(start);
   twoYearsLater.setFullYear(twoYearsLater.getFullYear() + 2);
 
   const totalDays = 730; // 2 years in days
-  const elapsedDays = Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
-  const remainingDays = Math.max(0, Math.floor((twoYearsLater.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  const elapsedDays = Math.max(0, Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+  const remainingDays = Math.max(0, Math.floor((twoYearsLater.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
 
   return {
     timeProgress: Math.min(100, (elapsedDays / totalDays) * 100),

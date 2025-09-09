@@ -77,15 +77,17 @@ export const DayDetails = ({
       {dayEntries.length > 0 && (
         <div className="space-y-2">
           <h4 className="font-medium text-gray-700">Today&apos;s Entries</h4>
-          {dayEntries.map((entry, index) => (
-            <EntryCard
-              key={index}
-              entry={entry}
-              onEdit={() => onEditEntry(dateKey, index)}
-              onDelete={() => onDeleteEntry(dateKey, index)}
-            />
-          ))}
-        </div>
+          <div className="max-h-64 overflow-y-auto space-y-2">
+              {dayEntries.map((entry, index) => (
+                <EntryCard
+                  key={index}
+                  entry={entry}
+                  onEdit={() => onEditEntry(dateKey, index)}
+                  onDelete={() => onDeleteEntry(dateKey, index)}
+                />
+              ))}
+            </div>
+          </div>
       )}
 
       {dayEntries.length === 0 && !isEditMode && (
