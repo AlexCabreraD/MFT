@@ -3,9 +3,11 @@ import { ProgressStats } from '@/lib/types';
 
 interface RequirementsViewProps {
   progress: ProgressStats;
+  trainingStartDate?: string;
+  onUpdateTrainingStartDate?: (date: string) => void;
 }
 
-export const RequirementsView = ({ progress }: RequirementsViewProps) => {
+export const RequirementsView = ({ progress, trainingStartDate, onUpdateTrainingStartDate }: RequirementsViewProps) => {
   const getStatusIcon = (current: number, required: number) => {
     return current >= required ? (
       <CheckCircle className="w-5 h-5 text-green-600" />
@@ -35,18 +37,18 @@ export const RequirementsView = ({ progress }: RequirementsViewProps) => {
 
         <div className="grid gap-4">
           {/* Clinical Hours */}
-          <div className={`border rounded-lg p-4 ${getStatusColor(progress.totalClinicalHours, 4000)}`}>
+          <div className={`border rounded-lg p-4 ${getStatusColor(progress.totalClinicalHours, 3000)}`}>
             <div className="flex items-start justify-between">
               <div className="flex items-center">
-                {getStatusIcon(progress.totalClinicalHours, 4000)}
+                {getStatusIcon(progress.totalClinicalHours, 3000)}
                 <div className="ml-3">
                   <h3 className="font-semibold">Supervised Clinical Training</h3>
-                  <p className="text-sm opacity-90">4,000 hours total (post-master&apos;s degree)</p>
+                  <p className="text-sm opacity-90">3,000 hours total (post-master&apos;s degree)</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold">{progress.totalClinicalHours.toFixed(1)} / 4,000</div>
-                <div className="text-sm opacity-75">{(4000 - progress.totalClinicalHours).toFixed(0)} remaining</div>
+                <div className="text-lg font-bold">{progress.totalClinicalHours.toFixed(1)} / 3,000</div>
+                <div className="text-sm opacity-75">{Math.max(0, 3000 - progress.totalClinicalHours).toFixed(0)} remaining</div>
               </div>
             </div>
             <div className="mt-3 w-full bg-white bg-opacity-50 rounded-full h-2">
@@ -57,14 +59,15 @@ export const RequirementsView = ({ progress }: RequirementsViewProps) => {
             </div>
           </div>
 
-          {/* Direct MFT Hours */}
+          {/* Mental Health Therapy Hours */}
           <div className={`border rounded-lg p-4 ${getStatusColor(progress.directMftHours, 1000)}`}>
             <div className="flex items-start justify-between">
               <div className="flex items-center">
                 {getStatusIcon(progress.directMftHours, 1000)}
                 <div className="ml-3">
-                  <h3 className="font-semibold">Direct MFT Client Contact</h3>
-                  <p className="text-sm opacity-90">1,000 hours minimum face-to-face therapy</p>
+                  <h3 className="font-semibold">Mental Health Therapy</h3>
+                  <p className="text-sm opacity-90">1,000 hours minimum mental health therapy</p>
+                  <p className="text-xs opacity-75 mt-1">Individual, family, and couple therapy sessions</p>
                 </div>
               </div>
               <div className="text-right">
@@ -103,6 +106,56 @@ export const RequirementsView = ({ progress }: RequirementsViewProps) => {
             </div>
           </div>
 
+          {/* Two-Year Minimum Timeline */}
+          <div className={`border rounded-lg p-4 ${progress.timeProgress >= 100 ? 'text-green-700 bg-green-50 border-green-200' : 'text-orange-700 bg-orange-50 border-orange-200'}`}>
+            <div className="flex items-start justify-between">
+              <div className="flex items-center">
+                {getStatusIcon(progress.timeProgress, 100)}
+                <div className="ml-3">
+                  <h3 className="font-semibold">Two-Year Minimum Requirement</h3>
+                  <p className="text-sm opacity-90">Training must span at least 2 years</p>
+                  {trainingStartDate && (
+                    <p className="text-xs opacity-75 mt-1">
+                      Started: {new Date(trainingStartDate).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold">{progress.timeProgress.toFixed(1)}%</div>
+                <div className="text-sm opacity-75">
+                  {progress.timeRemaining > 0 ? `${progress.timeRemaining} days remaining` : 'Requirement met'}
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 w-full bg-white bg-opacity-50 rounded-full h-2">
+              <div 
+                className="bg-current h-2 rounded-full opacity-60" 
+                style={{ width: `${Math.min(100, progress.timeProgress)}%` }}
+              ></div>
+            </div>
+            
+            {/* Training Start Date Configuration */}
+            {onUpdateTrainingStartDate && (
+              <div className="mt-4 pt-3 border-t border-current opacity-50">
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-medium opacity-90">
+                    Training Start Date:
+                  </label>
+                  <input
+                    type="date"
+                    value={trainingStartDate || ''}
+                    onChange={(e) => onUpdateTrainingStartDate(e.target.value)}
+                    className="px-2 py-1 text-sm border border-current rounded bg-white bg-opacity-50 focus:outline-none focus:ring-1 focus:ring-current"
+                  />
+                </div>
+                <p className="text-xs opacity-75 mt-1">
+                  Set when you began your supervised clinical training
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Additional Requirements */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2">Additional Requirements</h3>
@@ -112,6 +165,75 @@ export const RequirementsView = ({ progress }: RequirementsViewProps) => {
               <li>• Pass AMFTRB national exam</li>
               <li>• May require Utah jurisprudence exam</li>
               <li>• Master&apos;s/doctoral degree in MFT from accredited program</li>
+              <li>• 2 hours of suicide prevention training by Board-approved provider</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Licensure by Endorsement Requirements */}
+      <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center mb-4">
+          <FileText className="w-6 h-6 text-purple-600 mr-3" />
+          <h2 className="text-xl font-semibold text-gray-900">Licensure by Endorsement (Portability)</h2>
+          <span className="ml-2 text-sm text-gray-500">(Licensed in another state)</span>
+        </div>
+
+        <div className="grid gap-4">
+          {/* Endorsement Clinical Hours */}
+          <div className={`border rounded-lg p-4 ${getStatusColor(progress.totalClinicalHours, 4000)}`}>
+            <div className="flex items-start justify-between">
+              <div className="flex items-center">
+                {getStatusIcon(progress.totalClinicalHours, 4000)}
+                <div className="ml-3">
+                  <h3 className="font-semibold">Marriage and Family Therapy Practice</h3>
+                  <p className="text-sm opacity-90">4,000 hours minimum practice experience</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold">{progress.totalClinicalHours.toFixed(1)} / 4,000</div>
+                <div className="text-sm opacity-75">{Math.max(0, 4000 - progress.totalClinicalHours).toFixed(0)} remaining</div>
+              </div>
+            </div>
+            <div className="mt-3 w-full bg-white bg-opacity-50 rounded-full h-2">
+              <div 
+                className="bg-current h-2 rounded-full opacity-60" 
+                style={{ width: `${Math.min(100, progress.endorsementProgress)}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Endorsement Direct MFT Hours */}
+          <div className={`border rounded-lg p-4 ${getStatusColor(progress.directMftHours, 1000)}`}>
+            <div className="flex items-start justify-between">
+              <div className="flex items-center">
+                {getStatusIcon(progress.directMftHours, 1000)}
+                <div className="ml-3">
+                  <h3 className="font-semibold">Mental Health Therapy</h3>
+                  <p className="text-sm opacity-90">1,000 hours minimum within total practice</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold">{progress.directMftHours.toFixed(1)} / 1,000</div>
+                <div className="text-sm opacity-75">{Math.max(0, 1000 - progress.directMftHours).toFixed(0)} remaining</div>
+              </div>
+            </div>
+            <div className="mt-3 w-full bg-white bg-opacity-50 rounded-full h-2">
+              <div 
+                className="bg-current h-2 rounded-full opacity-60" 
+                style={{ width: `${Math.min(100, progress.directMftProgress)}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Endorsement Additional Requirements */}
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h3 className="font-semibold text-purple-900 mb-2">Additional Endorsement Requirements</h3>
+            <ul className="space-y-1 text-sm text-purple-800">
+              <li>• Currently licensed as MFT in another state</li>
+              <li>• State licensing standards substantially equivalent to Utah</li>
+              <li>• Verification from employer required</li>
+              <li>• Meet all current Utah MFT requirements</li>
             </ul>
           </div>
         </div>

@@ -55,6 +55,7 @@ export const SupervisionHourForm = ({ onSave, onCancel }: SupervisionHourFormPro
             step="0.5"
             value={hours}
             onChange={(e) => setHours(e.target.value)}
+            onWheel={(e) => e.currentTarget.blur()}
             className="w-full px-3 py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             placeholder="e.g., 1.0"
             required

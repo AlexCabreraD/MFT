@@ -20,6 +20,7 @@ export const useHourTracker = () => {
   const { user } = useUser();
   const [entries, setEntries] = useState<EntriesData>({});
   const [supervisionData, setSupervisionData] = useState<UserAppData['supervisionHours']>();
+  const [trainingStartDate, setTrainingStartDate] = useState<string | undefined>(undefined);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [editingDate, setEditingDate] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -32,6 +33,7 @@ export const useHourTracker = () => {
         const userData = loadFromClerkMetadata(user);
         setEntries(userData.entries || {});
         setSupervisionData(userData.supervisionHours || { total: 0, videoAudio: 0, sessions: [] });
+        setTrainingStartDate(userData.trainingStartDate);
       } catch (error) {
         console.error('Error loading data:', error);
         // Fallback to localStorage for migration
@@ -48,19 +50,19 @@ export const useHourTracker = () => {
     }
   }, [user]);
 
-  // Save data to Clerk metadata whenever entries or supervision data change
+  // Save data to Clerk metadata whenever entries, supervision data, or training start date change
   useEffect(() => {
-    if (user && (Object.keys(entries).length > 0 || supervisionData)) {
+    if (user && (Object.keys(entries).length > 0 || supervisionData || trainingStartDate)) {
       const saveData = async () => {
         try {
-          await saveToClerkMetadata(user, { entries, supervisionHours: supervisionData });
+          await saveToClerkMetadata(user, { entries, supervisionHours: supervisionData, trainingStartDate });
         } catch (error) {
           console.error('Error saving data:', error);
         }
       };
       saveData();
     }
-  }, [entries, supervisionData, user]);
+  }, [entries, supervisionData, trainingStartDate, user]);
 
   // Initialize editing for today by default when today is selected
   useEffect(() => {
@@ -195,7 +197,11 @@ export const useHourTracker = () => {
     });
   };
 
-  const progress: ProgressStats = calculateProgress(entries);
+  const updateTrainingStartDate = (dateString: string) => {
+    setTrainingStartDate(dateString);
+  };
+
+  const progress: ProgressStats = calculateProgress(entries, trainingStartDate);
 
   return {
     entries,
@@ -213,6 +219,8 @@ export const useHourTracker = () => {
     progress,
     supervisionData,
     addSupervisionHours,
-    deleteSupervisionSession
+    deleteSupervisionSession,
+    trainingStartDate,
+    updateTrainingStartDate
   };
 };

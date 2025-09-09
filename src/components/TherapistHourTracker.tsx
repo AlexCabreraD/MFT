@@ -33,7 +33,9 @@ export const TherapistHourTracker = () => {
     progress,
     supervisionData,
     addSupervisionHours,
-    deleteSupervisionSession
+    deleteSupervisionSession,
+    trainingStartDate,
+    updateTrainingStartDate
   } = useSupabaseHourTracker();
 
   const handleTodayClick = () => {
@@ -110,7 +112,11 @@ export const TherapistHourTracker = () => {
             onDeleteSupervisionSession={deleteSupervisionSession}
           />
         ) : view === 'requirements' ? (
-          <RequirementsView progress={progress} />
+          <RequirementsView 
+            progress={progress} 
+            trainingStartDate={trainingStartDate}
+            onUpdateTrainingStartDate={updateTrainingStartDate}
+          />
         ) : (
           <AnalyticsView entries={entries} progress={progress} />
         )}

@@ -30,7 +30,8 @@ export interface ProgressStats {
   totalClinicalHours: number;
   directMftHours: number; // Direct face-to-face MFT client contact
   relationalHours: number; // Family/couple therapy (subset of direct MFT)
-  clinicalProgress: number; // Progress toward 4,000 hours
+  clinicalProgress: number; // Progress toward 3,000 hours (initial licensure)
+  endorsementProgress: number; // Progress toward 4,000 hours (licensure by endorsement)
   directMftProgress: number; // Progress toward 1,000 direct MFT hours
   
   // Backward compatibility
@@ -58,6 +59,10 @@ export interface ProgressStats {
   videoAudioSupervisionHours: number;
   supervisionProgress: number;
   videoAudioSupervisionProgress: number;
+  
+  // Time-based Progress
+  timeProgress: number; // Progress toward 2-year minimum requirement
+  timeRemaining: number; // Days remaining until 2-year minimum is met
 }
 
 export interface CECycleInfo {

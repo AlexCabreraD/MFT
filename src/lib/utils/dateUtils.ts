@@ -30,3 +30,26 @@ export const getCECycleInfo = () => {
     };
   }
 };
+
+export const calculateTimeProgress = (startDate: string | null) => {
+  if (!startDate) {
+    return {
+      timeProgress: 0,
+      timeRemaining: 730 // 2 years in days
+    };
+  }
+
+  const start = new Date(startDate);
+  const now = new Date();
+  const twoYearsLater = new Date(start);
+  twoYearsLater.setFullYear(twoYearsLater.getFullYear() + 2);
+
+  const totalDays = 730; // 2 years in days
+  const elapsedDays = Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+  const remainingDays = Math.max(0, Math.floor((twoYearsLater.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+
+  return {
+    timeProgress: Math.min(100, (elapsedDays / totalDays) * 100),
+    timeRemaining: remainingDays
+  };
+};

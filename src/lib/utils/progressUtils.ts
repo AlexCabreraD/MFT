@@ -1,7 +1,7 @@
 import { EntriesData, ProgressStats } from '../types';
-import { getCECycleInfo } from './dateUtils';
+import { getCECycleInfo, calculateTimeProgress } from './dateUtils';
 
-export const calculateProgress = (entries: EntriesData): ProgressStats => {
+export const calculateProgress = (entries: EntriesData, trainingStartDate?: string): ProgressStats => {
   const allEntries = Object.values(entries).flat();
   
   // Clinical hours breakdown
@@ -57,17 +57,21 @@ export const calculateProgress = (entries: EntriesData): ProgressStats => {
     .filter(e => e.reviewedVideo || e.reviewedAudio)
     .reduce((sum, e) => sum + e.hours, 0);
 
+  // Time-based progress calculation
+  const timeCalc = calculateTimeProgress(trainingStartDate || null);
+
   return {
     // Clinical Hours (for MFT licensure)
     totalClinicalHours,
     directMftHours,
     relationalHours,
-    clinicalProgress: (totalClinicalHours / 4000) * 100, // 4,000 total clinical hours required
+    clinicalProgress: (totalClinicalHours / 3000) * 100, // 3,000 total clinical hours required for initial licensure
+    endorsementProgress: (totalClinicalHours / 4000) * 100, // 4,000 total clinical hours required for licensure by endorsement
     directMftProgress: (directMftHours / 1000) * 100, // 1,000 direct MFT hours required
     
     // Backward compatibility
     totalSessionHours: totalClinicalHours,
-    sessionProgress: (totalClinicalHours / 4000) * 100,
+    sessionProgress: (totalClinicalHours / 3000) * 100,
     relationalProgress: (relationalHours / 500) * 100,
     
     // CE Hours (for license renewal)
@@ -89,6 +93,10 @@ export const calculateProgress = (entries: EntriesData): ProgressStats => {
     totalSupervisionHours,
     videoAudioSupervisionHours,
     supervisionProgress: (totalSupervisionHours / 100) * 100,
-    videoAudioSupervisionProgress: (videoAudioSupervisionHours / 25) * 100 // 25 hours video/audio required
+    videoAudioSupervisionProgress: (videoAudioSupervisionHours / 25) * 100, // 25 hours video/audio required
+    
+    // Time-based Progress
+    timeProgress: timeCalc.timeProgress,
+    timeRemaining: timeCalc.timeRemaining
   };
 };

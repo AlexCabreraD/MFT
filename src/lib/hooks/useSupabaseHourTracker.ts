@@ -28,6 +28,7 @@ export const useSupabaseHourTracker = () => {
   const supabase = useSupabaseClient();
   const [entries, setEntries] = useState<EntriesData>({});
   const [supervisionData, setSupervisionData] = useState<UserSupervisionData>();
+  const [trainingStartDate, setTrainingStartDate] = useState<string | undefined>(undefined);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [editingDate, setEditingDate] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -317,7 +318,11 @@ export const useSupabaseHourTracker = () => {
     }
   };
 
-  const progress: ProgressStats = calculateProgress(entries);
+  const updateTrainingStartDate = (dateString: string) => {
+    setTrainingStartDate(dateString);
+  };
+
+  const progress: ProgressStats = calculateProgress(entries, trainingStartDate);
 
   return {
     entries,
@@ -336,6 +341,8 @@ export const useSupabaseHourTracker = () => {
     supervisionData,
     addSupervisionHours,
     deleteSupervisionSession: deleteSupervisionSessionLocal,
+    trainingStartDate,
+    updateTrainingStartDate,
     loading,
     error
   };

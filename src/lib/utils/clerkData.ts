@@ -19,6 +19,7 @@ export interface UserAppData {
       timestamp: string;
     }>;
   };
+  trainingStartDate?: string; // ISO date string for when supervised training began
 }
 
 export const saveToClerkMetadata = async (user: UserResource, data: UserAppData): Promise<void> => {

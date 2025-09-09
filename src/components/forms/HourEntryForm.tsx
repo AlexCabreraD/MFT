@@ -228,6 +228,7 @@ export const HourEntryForm = ({
             max="16"
             value={formData.hours}
             onChange={(e) => updateFormData({ hours: e.target.value })}
+            onWheel={(e) => e.currentTarget.blur()}
             className="w-full border border-pink-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
             placeholder="0.00"
             required
