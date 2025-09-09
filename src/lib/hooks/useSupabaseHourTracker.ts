@@ -4,6 +4,7 @@ import { EntriesData, FormData, HourEntry, ProgressStats } from '@/lib/types';
 import { formatDateKey, isToday } from '@/lib/utils/dateUtils';
 import { calculateProgress } from '@/lib/utils/progressUtils';
 import { useSupabaseClient } from '@/lib/hooks/useSupabaseClient';
+import { loadFromClerkMetadata, saveToClerkMetadata } from '@/lib/utils/clerkData';
 import {
   loadFromSupabase,
   saveHourEntry,
@@ -46,6 +47,10 @@ export const useSupabaseHourTracker = () => {
           const userData = await loadFromSupabase(supabase, user.id);
           setEntries(userData.entries || {});
           setSupervisionData(userData.supervisionHours || { total: 0, videoAudio: 0, sessions: [] });
+          
+          // Load training start date from Clerk metadata
+          const clerkData = loadFromClerkMetadata(user);
+          setTrainingStartDate(clerkData.trainingStartDate);
         } catch (err) {
           console.error('Error loading data from Supabase:', err);
           setError('Failed to load data from database');
@@ -58,6 +63,24 @@ export const useSupabaseHourTracker = () => {
       setLoading(false);
     }
   }, [user, supabase]);
+
+  // Save training start date to Clerk metadata when it changes
+  useEffect(() => {
+    if (user && trainingStartDate !== undefined) {
+      const saveData = async () => {
+        try {
+          const clerkData = loadFromClerkMetadata(user);
+          await saveToClerkMetadata(user, { 
+            ...clerkData, 
+            trainingStartDate 
+          });
+        } catch (error) {
+          console.error('Error saving training start date to Clerk metadata:', error);
+        }
+      };
+      saveData();
+    }
+  }, [trainingStartDate, user]);
 
   // Initialize editing for today by default when today is selected
   useEffect(() => {

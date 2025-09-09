@@ -1,4 +1,5 @@
-import { CheckCircle, Clock, BookOpen, Users, GraduationCap, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle, Clock, BookOpen, Users, GraduationCap, FileText, Edit3, Check, X } from 'lucide-react';
 import { ProgressStats } from '@/lib/types';
 
 interface RequirementsViewProps {
@@ -8,6 +9,16 @@ interface RequirementsViewProps {
 }
 
 export const RequirementsView = ({ progress, trainingStartDate, onUpdateTrainingStartDate }: RequirementsViewProps) => {
+  const [isEditingStartDate, setIsEditingStartDate] = useState(false);
+  const [tempStartDate, setTempStartDate] = useState(trainingStartDate || '');
+
+  // Update temp state when trainingStartDate prop changes
+  useEffect(() => {
+    if (!isEditingStartDate) {
+      setTempStartDate(trainingStartDate || '');
+    }
+  }, [trainingStartDate, isEditingStartDate]);
+
   const getStatusIcon = (current: number, required: number) => {
     return current >= required ? (
       <CheckCircle className="w-5 h-5 text-green-600" />
@@ -18,6 +29,23 @@ export const RequirementsView = ({ progress, trainingStartDate, onUpdateTraining
 
   const getStatusColor = (current: number, required: number) => {
     return current >= required ? 'text-green-700 bg-green-50 border-green-200' : 'text-orange-700 bg-orange-50 border-orange-200';
+  };
+
+  const handleStartEdit = () => {
+    setTempStartDate(trainingStartDate || '');
+    setIsEditingStartDate(true);
+  };
+
+  const handleSaveStartDate = () => {
+    if (onUpdateTrainingStartDate && tempStartDate) {
+      onUpdateTrainingStartDate(tempStartDate);
+    }
+    setIsEditingStartDate(false);
+  };
+
+  const handleCancelEdit = () => {
+    setTempStartDate(trainingStartDate || '');
+    setIsEditingStartDate(false);
   };
 
   return (
@@ -138,19 +166,56 @@ export const RequirementsView = ({ progress, trainingStartDate, onUpdateTraining
             {/* Training Start Date Configuration */}
             {onUpdateTrainingStartDate && (
               <div className="mt-4 pt-3 border-t border-current opacity-50">
-                <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium opacity-90">
-                    Training Start Date:
-                  </label>
-                  <input
-                    type="date"
-                    value={trainingStartDate || ''}
-                    onChange={(e) => onUpdateTrainingStartDate(e.target.value)}
-                    className="px-2 py-1 text-sm border border-current rounded bg-white bg-opacity-50 focus:outline-none focus:ring-1 focus:ring-current"
-                  />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm font-medium opacity-90">
+                      Training Start Date:
+                    </label>
+                    {!isEditingStartDate ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">
+                          {trainingStartDate ? new Date(trainingStartDate).toLocaleDateString() : 'Not set'}
+                        </span>
+                        <button
+                          onClick={handleStartEdit}
+                          className="p-1 hover:bg-white hover:bg-opacity-30 rounded transition-colors"
+                          title="Edit training start date"
+                        >
+                          <Edit3 className="w-3 h-3 opacity-75" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="date"
+                          value={tempStartDate}
+                          onChange={(e) => setTempStartDate(e.target.value)}
+                          className="px-2 py-1 text-sm border border-current rounded bg-white bg-opacity-50 focus:outline-none focus:ring-1 focus:ring-current"
+                          autoFocus
+                        />
+                        <button
+                          onClick={handleSaveStartDate}
+                          className="p-1 hover:bg-white hover:bg-opacity-30 rounded transition-colors text-green-600"
+                          title="Save"
+                        >
+                          <Check className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="p-1 hover:bg-white hover:bg-opacity-30 rounded transition-colors text-red-600"
+                          title="Cancel"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs opacity-75 mt-1">
-                  Set when you began your supervised clinical training
+                  {isEditingStartDate 
+                    ? 'Select when you began your supervised clinical training'
+                    : 'Click the edit icon to change your training start date'
+                  }
                 </p>
               </div>
             )}
