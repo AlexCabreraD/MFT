@@ -11,7 +11,7 @@ export interface HourEntry {
 }
 
 export interface FormData {
-  type: 'session' | 'supervision' | 'ce';
+  type: 'session' | 'supervision' | 'ce' | 'psychotherapy';
   subtype: string;
   hours: string;
   notes: string;

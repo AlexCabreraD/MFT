@@ -40,6 +40,24 @@ export const EntryCard = ({ entry, onDelete, onEdit }: EntryCardProps) => {
     return categoryOption ? categoryOption.label : ceCategory;
   };
 
+  const getSessionDisplayLabel = (type: string, subtype: string) => {
+    if (type !== 'session') return `${type} - ${subtype}`;
+    
+    // Psychotherapy sessions
+    const psychotherapyTypes = ['individual', 'family', 'couple'];
+    if (psychotherapyTypes.includes(subtype)) {
+      const subtypeLabels = {
+        individual: 'Individual',
+        family: 'Family', 
+        couple: 'Couple/Marriage'
+      };
+      return `psychotherapy - ${subtypeLabels[subtype as keyof typeof subtypeLabels]}`;
+    }
+    
+    // Other session types remain as "session - {type}"
+    return `session - ${subtype}`;
+  };
+
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
       <div className="flex items-center justify-between">
@@ -49,7 +67,7 @@ export const EntryCard = ({ entry, onDelete, onEdit }: EntryCardProps) => {
             <span className="font-medium text-gray-900 capitalize">
               {entry.type === 'ce' ? 
                 `Continuing Education${entry.ceCategory ? ` - ${getCECategoryLabel(entry.ceCategory)}` : ''}` :
-                `${entry.type} - ${entry.subtype}`
+                getSessionDisplayLabel(entry.type, entry.subtype)
               }
             </span>
             <span className="text-pink-600 font-medium">{entry.hours}h</span>

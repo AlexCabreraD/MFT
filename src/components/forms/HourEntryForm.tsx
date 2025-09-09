@@ -80,6 +80,7 @@ export const HourEntryForm = ({
             }}
             className="w-full border border-pink-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
           >
+            <option value="psychotherapy">Psychotherapy</option>
             <option value="session">Session</option>
             <option value="supervision">Supervision</option>
             <option value="ce">Continuing Education</option>

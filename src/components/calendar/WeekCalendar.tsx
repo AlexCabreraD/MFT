@@ -9,6 +9,18 @@ interface WeekCalendarProps {
 }
 
 export const WeekCalendar = ({ selectedDate, entries, onDateSelect }: WeekCalendarProps) => {
+  const getSessionDisplayLabel = (type: string, subtype: string) => {
+    if (type !== 'session') return type;
+    
+    // Psychotherapy sessions
+    const psychotherapyTypes = ['individual', 'family', 'couple'];
+    if (psychotherapyTypes.includes(subtype)) {
+      return 'psychotherapy';
+    }
+    
+    // Other session types remain as "session"
+    return 'session';
+  };
   const startOfWeek = new Date(selectedDate);
   startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
 
@@ -116,7 +128,7 @@ export const WeekCalendar = ({ selectedDate, entries, onDateSelect }: WeekCalend
                     entry.type === 'supervision' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                   }`}
                 >
-                  {entry.type} - {entry.hours}h
+                  {getSessionDisplayLabel(entry.type, entry.subtype)} - {entry.hours}h
                 </div>
               ))}
               {dayEntries.length > 3 && (

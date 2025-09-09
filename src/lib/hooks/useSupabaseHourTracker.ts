@@ -13,7 +13,7 @@ import {
 } from '@/lib/utils/supabaseData';
 
 const defaultFormData: FormData = {
-  type: 'session',
+  type: 'psychotherapy',
   subtype: '',
   hours: '',
   notes: '',
@@ -153,6 +153,7 @@ export const useSupabaseHourTracker = () => {
       setError(null);
       const entry: HourEntry = {
         ...formData,
+        type: formData.type === 'psychotherapy' ? 'session' : formData.type,
         hours: parseFloat(formData.hours),
         timestamp: new Date().toISOString()
       };
@@ -228,8 +229,14 @@ export const useSupabaseHourTracker = () => {
     const entry = entries[dateKey]?.[index];
     if (!entry) return;
 
+    // Convert session entries with psychotherapy subtypes back to "psychotherapy" type for editing
+    const psychotherapyTypes = ['individual', 'family', 'couple'];
+    const displayType = entry.type === 'session' && psychotherapyTypes.includes(entry.subtype) 
+      ? 'psychotherapy' 
+      : entry.type;
+
     const editFormData: FormData = {
-      type: entry.type,
+      type: displayType as FormData['type'],
       subtype: entry.subtype,
       hours: entry.hours.toString(),
       notes: entry.notes,

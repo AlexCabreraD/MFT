@@ -2,11 +2,14 @@ import { SubtypeOption, CECategoryOption, DeliveryFormatOption } from '../types'
 
 export const getSubtypeOptions = (type: string): SubtypeOption[] => {
   switch (type) {
-    case 'session':
+    case 'psychotherapy':
       return [
         { value: 'individual', label: 'Individual Therapy' },
         { value: 'family', label: 'Family Therapy' },
-        { value: 'couple', label: 'Couple/Marriage Therapy' },
+        { value: 'couple', label: 'Couple/Marriage Therapy' }
+      ];
+    case 'session':
+      return [
         { value: 'assessment', label: 'Assessment/Evaluation' },
         { value: 'consultation', label: 'Consultation' },
         { value: 'documentation', label: 'Documentation/Case Notes' },
@@ -32,6 +35,8 @@ export const getSubtypeOptions = (type: string): SubtypeOption[] => {
 
 export const getSubtypeLabel = (type: string): string => {
   switch (type) {
+    case 'psychotherapy':
+      return 'Therapy Type';
     case 'session':
       return 'Session Type';
     case 'supervision':

@@ -22,6 +22,24 @@ export const RecentActivity = ({ entries }: RecentActivityProps) => {
     }
   };
 
+  const getSessionDisplayLabel = (type: string, subtype: string) => {
+    if (type !== 'session') return `${type} - ${subtype}`;
+    
+    // Psychotherapy sessions
+    const psychotherapyTypes = ['individual', 'family', 'couple'];
+    if (psychotherapyTypes.includes(subtype)) {
+      const subtypeLabels = {
+        individual: 'Individual',
+        family: 'Family', 
+        couple: 'Couple/Marriage'
+      };
+      return `psychotherapy - ${subtypeLabels[subtype as keyof typeof subtypeLabels]}`;
+    }
+    
+    // Other session types remain as "session - {type}"
+    return `session - ${subtype}`;
+  };
+
   const recentEntries: ActivityEntry[] = Object.entries(entries)
     .flatMap(([date, dayEntries]) => 
       dayEntries.map(entry => ({ ...entry, date }))
@@ -39,7 +57,7 @@ export const RecentActivity = ({ entries }: RecentActivityProps) => {
               <span className={`w-3 h-3 rounded-full ${getEntryColor(entry.type)}`} />
               <div>
                 <div className="font-medium text-gray-900 capitalize">
-                  {entry.type} - {entry.subtype}
+                  {getSessionDisplayLabel(entry.type, entry.subtype)}
                 </div>
                 <div className="text-sm text-gray-600">
                   {new Date(entry.date).toLocaleDateString()}
