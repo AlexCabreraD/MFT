@@ -4,9 +4,16 @@ import { getCECycleInfo, calculateTimeProgress } from './dateUtils';
 export const calculateProgress = (entries: EntriesData, trainingStartDate?: string): ProgressStats => {
   const allEntries = Object.values(entries).flat();
   
-  // Clinical hours breakdown
+  // Clinical hours breakdown - only count clinical activities, not documentation
   const sessionEntries = allEntries.filter(e => e.type === 'session');
-  const totalClinicalHours = sessionEntries.reduce((sum, e) => sum + e.hours, 0);
+  const clinicalSessionEntries = sessionEntries.filter(e => 
+    // Include psychotherapy sessions (individual, family, couple)
+    e.subtype === 'individual' || e.subtype === 'family' || e.subtype === 'couple' ||
+    // Include assessment and consultation
+    e.subtype === 'assessment' || e.subtype === 'consultation'
+    // Exclude documentation and other non-clinical activities
+  );
+  const totalClinicalHours = clinicalSessionEntries.reduce((sum, e) => sum + e.hours, 0);
   
   // Direct face-to-face MFT client contact hours
   const directMftHours = sessionEntries
