@@ -4,7 +4,6 @@ import { EntriesData, FormData, HourEntry, ProgressStats } from '@/lib/types';
 import { formatDateKey, isToday } from '@/lib/utils/dateUtils';
 import { calculateProgress } from '@/lib/utils/progressUtils';
 import { useSupabaseClient } from '@/lib/hooks/useSupabaseClient';
-import { loadFromClerkMetadata, saveToClerkMetadata } from '@/lib/utils/clerkData';
 import {
   loadFromSupabase,
   saveHourEntry,
@@ -47,10 +46,6 @@ export const useSupabaseHourTracker = () => {
           const userData = await loadFromSupabase(supabase, user.id);
           setEntries(userData.entries || {});
           setSupervisionData(userData.supervisionHours || { total: 0, videoAudio: 0, sessions: [] });
-          
-          // Load training start date from Clerk metadata
-          const clerkData = loadFromClerkMetadata(user);
-          setTrainingStartDate(clerkData.trainingStartDate);
         } catch (err) {
           console.error('Error loading data from Supabase:', err);
           setError('Failed to load data from database');
@@ -64,15 +59,29 @@ export const useSupabaseHourTracker = () => {
     }
   }, [user, supabase]);
 
-  // Save training start date to Clerk metadata when it changes
+  // Load training start date from Clerk metadata when user changes
+  useEffect(() => {
+    if (user) {
+      try {
+        const clerkMetadata = user.unsafeMetadata as any;
+        setTrainingStartDate(clerkMetadata?.trainingStartDate);
+      } catch (err) {
+        console.error('Error loading training start date from Clerk metadata:', err);
+      }
+    }
+  }, [user]);
+
+  // Save only training start date to Clerk metadata when it changes
   useEffect(() => {
     if (user && trainingStartDate !== undefined) {
       const saveData = async () => {
         try {
-          const clerkData = loadFromClerkMetadata(user);
-          await saveToClerkMetadata(user, { 
-            ...clerkData, 
-            trainingStartDate 
+          const existingMetadata = user.unsafeMetadata as any;
+          await user.update({
+            unsafeMetadata: {
+              ...existingMetadata,
+              trainingStartDate
+            }
           });
         } catch (error) {
           console.error('Error saving training start date to Clerk metadata:', error);

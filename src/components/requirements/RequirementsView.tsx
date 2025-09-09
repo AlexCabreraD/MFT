@@ -48,6 +48,15 @@ export const RequirementsView = ({ progress, trainingStartDate, onUpdateTraining
     setIsEditingStartDate(false);
   };
 
+  // Helper function to format date string as local date (avoiding timezone issues)
+  const formatLocalDate = (dateString: string) => {
+    if (!dateString) return 'Not set';
+    // Split the date string and create a date using local timezone
+    const [year, month, day] = dateString.split('-').map(Number);
+    const localDate = new Date(year, month - 1, day); // month is 0-indexed
+    return localDate.toLocaleDateString();
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div className="text-center mb-8">
@@ -144,7 +153,7 @@ export const RequirementsView = ({ progress, trainingStartDate, onUpdateTraining
                   <p className="text-sm opacity-90">Training must span at least 2 years</p>
                   {trainingStartDate && (
                     <p className="text-xs opacity-75 mt-1">
-                      Started: {new Date(trainingStartDate).toLocaleDateString()}
+                      Started: {formatLocalDate(trainingStartDate)}
                     </p>
                   )}
                 </div>
@@ -174,7 +183,7 @@ export const RequirementsView = ({ progress, trainingStartDate, onUpdateTraining
                     {!isEditingStartDate ? (
                       <div className="flex items-center gap-2">
                         <span className="text-sm">
-                          {trainingStartDate ? new Date(trainingStartDate).toLocaleDateString() : 'Not set'}
+                          {formatLocalDate(trainingStartDate || '')}
                         </span>
                         <button
                           onClick={handleStartEdit}
