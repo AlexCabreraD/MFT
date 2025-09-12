@@ -47,7 +47,7 @@ export const CalendarHeader = ({
   return (
     <div className="bg-pink-50 border-b border-pink-200 p-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
           <button
             onClick={handlePrevious}
             className="p-1 hover:bg-pink-100 rounded"
@@ -55,7 +55,10 @@ export const CalendarHeader = ({
             <ChevronLeft className="w-5 h-5 text-pink-600" />
           </button>
           
-          <h2 className="text-lg font-semibold text-pink-900">
+          <h2 
+            className="text-lg font-semibold text-pink-900 font-[family-name:var(--font-dancing-script)] whitespace-nowrap overflow-hidden text-ellipsis min-w-0 max-w-xs"
+            title={getHeaderTitle()}
+          >
             {getHeaderTitle()}
           </h2>
           
@@ -67,7 +70,7 @@ export const CalendarHeader = ({
           </button>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <button
             onClick={() => onViewChange('month')}
             className={`px-3 py-1 rounded text-sm transition-colors cursor-pointer ${

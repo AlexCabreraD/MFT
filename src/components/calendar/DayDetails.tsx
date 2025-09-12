@@ -42,8 +42,8 @@ export const DayDetails = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900">
+      <div className="flex items-start justify-between gap-4">
+        <h3 className="text-lg font-medium text-gray-900 max-w-[calc(100%-7rem-16px)] flex-1 min-w-0">
           {selectedDate.toLocaleDateString('en-US', { 
             weekday: 'long', 
             year: 'numeric', 
@@ -57,7 +57,7 @@ export const DayDetails = ({
         {!isEditMode && canEdit && (
           <button
             onClick={handleAddHours}
-            className="bg-pink-500 text-white px-3 py-1 rounded-md hover:bg-pink-600 transition-colors flex items-center gap-2 cursor-pointer"
+            className="bg-pink-500 text-white px-3 py-1 rounded-md hover:bg-pink-600 transition-colors flex items-center gap-2 cursor-pointer flex-shrink-0"
           >
             <Plus className="w-4 h-4" />
             Add Hours

@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Calendar, BarChart3, Users, BookOpen } from 'lucide-react';
+import { Calendar, BarChart3, Users, BookOpen } from 'lucide-react';
 import { ViewType } from '@/lib/types';
 import { UserButton, useUser } from '@clerk/nextjs';
 
@@ -15,9 +15,6 @@ export const Header = ({ view, onViewChange }: HeaderProps) => {
   return (
     <div className="flex items-center justify-between mb-8">
       <div className="flex items-center gap-3">
-        <div className="bg-pink-500 p-3 rounded-lg shadow-lg">
-          <Clock className="w-8 h-8 text-white" />
-        </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Therapist Hour Tracker</h1>
           <p className="text-gray-600">Utah Mental Health Professional Licensing</p>
