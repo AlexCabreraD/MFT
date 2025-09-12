@@ -109,3 +109,26 @@ export interface DeliveryFormatOption {
   value: DeliveryFormat;
   label: string;
 }
+
+export interface UserSupervisionData {
+  total: number;
+  videoAudio: number;
+  sessions: Array<{
+    date: string;
+    hours: number;
+    hasVideo: boolean;
+    hasAudio: boolean;
+    notes?: string;
+    timestamp: string;
+  }>;
+}
+
+export interface UserAppData {
+  entries: EntriesData;
+  outOfOfficeData: OutOfOfficeData;
+  preferences?: {
+    selectedDate?: string;
+    calendarView?: 'month' | 'week';
+  };
+  supervisionHours?: UserSupervisionData;
+}

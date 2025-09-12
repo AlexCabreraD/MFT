@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { EntriesData, FormData, HourEntry, ProgressStats, OutOfOfficeData } from '@/lib/types';
+import { EntriesData, FormData, HourEntry, ProgressStats, OutOfOfficeData, UserSupervisionData } from '@/lib/types';
 import { formatDateKey, isToday } from '@/lib/utils/dateUtils';
 import { calculateProgress } from '@/lib/utils/progressUtils';
 import { useSupabaseClient } from '@/lib/hooks/useSupabaseClient';
@@ -10,8 +10,7 @@ import {
   updateHourEntry,
   deleteHourEntry,
   saveOutOfOfficeEntry,
-  deleteOutOfOfficeEntry,
-  UserSupervisionData
+  deleteOutOfOfficeEntry
 } from '@/lib/utils/supabaseData';
 
 const defaultFormData: FormData = {

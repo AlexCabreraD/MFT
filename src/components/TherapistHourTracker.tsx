@@ -87,6 +87,7 @@ export const TherapistHourTracker = () => {
                     <WeekCalendar
                       selectedDate={selectedDate}
                       entries={entries}
+                      outOfOfficeData={outOfOfficeData}
                       onDateSelect={setSelectedDate}
                     />
                   )}

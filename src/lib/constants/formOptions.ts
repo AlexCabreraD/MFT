@@ -95,11 +95,3 @@ export const deliveryFormatOptions: DeliveryFormatOption[] = [
   }
 ];
 
-export const outOfOfficeReasonOptions: SubtypeOption[] = [
-  { value: 'vacation', label: 'Vacation' },
-  { value: 'sick-leave', label: 'Sick Leave' },
-  { value: 'personal', label: 'Personal Day' },
-  { value: 'holiday', label: 'Holiday' },
-  { value: 'training', label: 'Training/Conference' },
-  { value: 'other', label: 'Other' }
-];

@@ -1,14 +1,15 @@
-import { EntriesData } from '@/lib/types';
+import { EntriesData, OutOfOfficeData } from '@/lib/types';
 import { formatDateKey, isToday, isSameDay } from '@/lib/utils/dateUtils';
 import { Clock, TrendingUp, Target, AlertCircle } from 'lucide-react';
 
 interface WeekCalendarProps {
   selectedDate: Date;
   entries: EntriesData;
+  outOfOfficeData: OutOfOfficeData;
   onDateSelect: (date: Date) => void;
 }
 
-export const WeekCalendar = ({ selectedDate, entries, onDateSelect }: WeekCalendarProps) => {
+export const WeekCalendar = ({ selectedDate, entries, outOfOfficeData, onDateSelect }: WeekCalendarProps) => {
   const getSessionDisplayLabel = (type: string, subtype: string) => {
     if (type !== 'session') return type;
     
@@ -96,6 +97,7 @@ export const WeekCalendar = ({ selectedDate, entries, onDateSelect }: WeekCalend
       {weekDays.map(date => {
         const dateKey = formatDateKey(date);
         const dayEntries = entries[dateKey] || [];
+        const isOutOfOffice = !!outOfOfficeData[dateKey];
         const totalHours = dayEntries.reduce((sum, e) => sum + e.hours, 0);
         const isSelected = isSameDay(date, selectedDate);
         const isCurrentDay = isToday(date);
@@ -104,37 +106,51 @@ export const WeekCalendar = ({ selectedDate, entries, onDateSelect }: WeekCalend
           <div
             key={dateKey}
             className={`border rounded-lg p-3 cursor-pointer transition-all hover:shadow-md ${
-              isSelected ? 'bg-pink-50 border-pink-300 shadow-md' : 'border-pink-100'
+              isOutOfOffice 
+                ? (isSelected ? 'bg-gray-100 border-gray-400' : 'bg-gray-50 border-gray-300')
+                : (isSelected ? 'bg-pink-50 border-pink-300 shadow-md' : 'border-pink-100')
             } ${isCurrentDay ? 'ring-2 ring-pink-400' : ''}`}
             onClick={() => onDateSelect(date)}
           >
             <div className={`font-medium ${isCurrentDay ? 'text-pink-600' : 'text-gray-700'}`}>
               {date.toLocaleDateString('en-US', { weekday: 'short' })}
             </div>
-            <div className={`text-lg ${isCurrentDay ? 'text-pink-600' : 'text-gray-900'}`}>
+            <div className={`text-lg ${
+              isCurrentDay ? 'text-pink-600' : 
+              isOutOfOffice ? 'text-gray-600' : 'text-gray-900'
+            }`}>
               {date.getDate()}
             </div>
-            {totalHours > 0 && (
-              <div className="text-sm text-pink-600 mt-1 font-medium">
-                {totalHours}h
+            
+            {isOutOfOffice ? (
+              <div className="text-sm text-gray-500 mt-1 font-[family-name:var(--font-dancing-script)]">
+                Out of Office
               </div>
-            )}
-            <div className="mt-2 space-y-1">
-              {dayEntries.slice(0, 3).map((entry, idx) => (
-                <div
-                  key={idx}
-                  className={`text-xs px-2 py-1 rounded ${
-                    entry.type === 'session' ? 'bg-pink-100 text-pink-700' :
-                    entry.type === 'supervision' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                  }`}
-                >
-                  {getSessionDisplayLabel(entry.type, entry.subtype)} - {entry.hours}h
+            ) : (
+              <>
+                {totalHours > 0 && (
+                  <div className="text-sm text-pink-600 mt-1 font-medium">
+                    {totalHours}h
+                  </div>
+                )}
+                <div className="mt-2 space-y-1">
+                  {dayEntries.slice(0, 3).map((entry, idx) => (
+                    <div
+                      key={idx}
+                      className={`text-xs px-2 py-1 rounded ${
+                        entry.type === 'session' ? 'bg-pink-100 text-pink-700' :
+                        entry.type === 'supervision' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                      }`}
+                    >
+                      {getSessionDisplayLabel(entry.type, entry.subtype)} - {entry.hours}h
+                    </div>
+                  ))}
+                  {dayEntries.length > 3 && (
+                    <div className="text-xs text-gray-500">+{dayEntries.length - 3} more</div>
+                  )}
                 </div>
-              ))}
-              {dayEntries.length > 3 && (
-                <div className="text-xs text-gray-500">+{dayEntries.length - 3} more</div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         );
       })}

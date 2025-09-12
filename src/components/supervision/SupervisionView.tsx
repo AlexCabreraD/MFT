@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Plus, Users, Target } from 'lucide-react';
 import { SupervisionHourForm } from '@/components/forms/SupervisionHourForm';
 import { SupervisionCard } from '@/components/ui/SupervisionCard';
-import { UserAppData } from '@/lib/utils/clerkData';
+import { UserAppData } from '@/lib/types';
 import { ProgressStats } from '@/lib/types';
 
 interface SupervisionViewProps {

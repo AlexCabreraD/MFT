@@ -1,5 +1,5 @@
 import { Trash2, Video, Volume2, Clock } from 'lucide-react';
-import { UserAppData } from '@/lib/utils/clerkData';
+import { UserAppData } from '@/lib/types';
 
 interface SupervisionCardProps {
   session: NonNullable<UserAppData['supervisionHours']>['sessions'][0];
