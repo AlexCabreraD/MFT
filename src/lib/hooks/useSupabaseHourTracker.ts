@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { EntriesData, FormData, HourEntry, ProgressStats } from '@/lib/types';
+import { EntriesData, FormData, HourEntry, ProgressStats, OutOfOfficeData } from '@/lib/types';
 import { formatDateKey, isToday } from '@/lib/utils/dateUtils';
 import { calculateProgress } from '@/lib/utils/progressUtils';
 import { useSupabaseClient } from '@/lib/hooks/useSupabaseClient';
@@ -9,6 +9,8 @@ import {
   saveHourEntry,
   updateHourEntry,
   deleteHourEntry,
+  saveOutOfOfficeEntry,
+  deleteOutOfOfficeEntry,
   UserSupervisionData
 } from '@/lib/utils/supabaseData';
 
@@ -32,6 +34,7 @@ export const useSupabaseHourTracker = () => {
   const { user } = useUser();
   const supabase = useSupabaseClient();
   const [entries, setEntries] = useState<EntriesData>({});
+  const [outOfOfficeData, setOutOfOfficeData] = useState<OutOfOfficeData>({});
   const [supervisionData, setSupervisionData] = useState<UserSupervisionData>();
   const [trainingStartDate, setTrainingStartDate] = useState<string | undefined>(undefined);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -50,6 +53,7 @@ export const useSupabaseHourTracker = () => {
           setError(null);
           const userData = await loadFromSupabase(supabase, user.id);
           setEntries(userData.entries || {});
+          setOutOfOfficeData(userData.outOfOfficeData || {});
           setSupervisionData(userData.supervisionHours || { total: 0, videoAudio: 0, sessions: [] });
         } catch (err) {
           console.error('Error loading data from Supabase:', err);
@@ -96,17 +100,24 @@ export const useSupabaseHourTracker = () => {
     }
   }, [trainingStartDate, user]);
 
-  // Initialize editing for today by default when today is selected
+  // Track if we've done initial auto-open to prevent continuous reopening
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
+
+  // Initialize editing for today by default on initial load only (but not if OOO)
   useEffect(() => {
     const currentDateKey = formatDateKey(selectedDate);
     const todayKey = formatDateKey(new Date());
     
-    if (isToday(selectedDate) && !editingDate) {
+    // Only auto-open on initial load when viewing today
+    if (isToday(selectedDate) && !editingDate && !outOfOfficeData[currentDateKey] && !hasAutoOpened && !loading) {
       setEditingDate(currentDateKey);
-    } else if (!isToday(selectedDate) && editingDate === todayKey) {
+      setHasAutoOpened(true);
+    } 
+    // Close form when switching away from today
+    else if (!isToday(selectedDate) && editingDate === todayKey) {
       setEditingDate(null);
     }
-  }, [selectedDate, editingDate]);
+  }, [selectedDate, editingDate, outOfOfficeData, hasAutoOpened, loading]);
 
   const saveEntry = async (): Promise<boolean> => {
     if (!user) {
@@ -366,10 +377,78 @@ export const useSupabaseHourTracker = () => {
     setTrainingStartDate(dateString);
   };
 
+  const setOutOfOffice = async (dateKey: string, reason: string, notes?: string) => {
+    if (!user) {
+      setError('User not authenticated');
+      return;
+    }
+
+    try {
+      setError(null);
+
+      const oooEntry = {
+        date: dateKey,
+        reason: 'OoO', // Default reason until UI form is implemented
+        notes: notes || ''
+      };
+
+      // Save to database
+      await saveOutOfOfficeEntry(supabase, user.id, oooEntry);
+      
+      // Update local state
+      setOutOfOfficeData(prev => ({
+        ...prev,
+        [dateKey]: oooEntry
+      }));
+    } catch (err) {
+      console.error('Error setting out of office:', err);
+      setError(`Failed to set out of office: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  const removeOutOfOffice = async (dateKey: string) => {
+    if (!user) {
+      setError('User not authenticated');
+      return;
+    }
+
+    try {
+      setError(null);
+      
+      // Delete from database
+      await deleteOutOfOfficeEntry(supabase, user.id, dateKey);
+      
+      // Update local state
+      setOutOfOfficeData(prev => {
+        const newData = { ...prev };
+        delete newData[dateKey];
+        return newData;
+      });
+    } catch (err) {
+      console.error('Error removing out of office:', err);
+      setError('Failed to remove out of office');
+    }
+  };
+
+  // Helper functions for OOO status
+  const isOutOfOffice = (dateKey: string): boolean => {
+    return !!outOfOfficeData[dateKey];
+  };
+
+  const getOutOfOfficeEntry = (dateKey: string) => {
+    return outOfOfficeData[dateKey] || null;
+  };
+
+  const hasHoursLogged = (dateKey: string): boolean => {
+    const dayEntries = entries[dateKey] || [];
+    return dayEntries.length > 0;
+  };
+
   const progress: ProgressStats = calculateProgress(entries, trainingStartDate);
 
   return {
     entries,
+    outOfOfficeData,
     selectedDate,
     setSelectedDate,
     editingDate,
@@ -381,6 +460,11 @@ export const useSupabaseHourTracker = () => {
     editEntry,
     deleteEntry,
     cancelEdit,
+    setOutOfOffice,
+    removeOutOfOffice,
+    isOutOfOffice,
+    getOutOfOfficeEntry,
+    hasHoursLogged,
     progress,
     supervisionData,
     addSupervisionHours,

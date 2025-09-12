@@ -21,6 +21,7 @@ export const TherapistHourTracker = () => {
   
   const {
     entries,
+    outOfOfficeData,
     selectedDate,
     setSelectedDate,
     editingDate,
@@ -30,6 +31,11 @@ export const TherapistHourTracker = () => {
     saveEntry,
     editEntry,
     deleteEntry,
+    setOutOfOffice,
+    removeOutOfOffice,
+    isOutOfOffice,
+    getOutOfOfficeEntry,
+    hasHoursLogged,
     progress,
     supervisionData,
     addSupervisionHours,
@@ -74,6 +80,7 @@ export const TherapistHourTracker = () => {
                     <MonthCalendar
                       selectedDate={selectedDate}
                       entries={entries}
+                      outOfOfficeData={outOfOfficeData}
                       onDateSelect={setSelectedDate}
                     />
                   ) : (
@@ -100,6 +107,11 @@ export const TherapistHourTracker = () => {
                   onSaveEntry={saveEntry}
                   onEditEntry={editEntry}
                   onDeleteEntry={deleteEntry}
+                  onSetOutOfOffice={setOutOfOffice}
+                  onRemoveOutOfOffice={removeOutOfOffice}
+                  isOutOfOffice={isOutOfOffice}
+                  getOutOfOfficeEntry={getOutOfOfficeEntry}
+                  hasHoursLogged={hasHoursLogged}
                 />
               </div>
             </div>

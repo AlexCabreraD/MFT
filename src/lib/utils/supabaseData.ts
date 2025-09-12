@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js'
-import { EntriesData, HourEntry } from '@/lib/types'
+import { EntriesData, HourEntry, OutOfOfficeData, OutOfOfficeEntry } from '@/lib/types'
 
 export interface UserSupervisionData {
   total: number
@@ -16,6 +16,7 @@ export interface UserSupervisionData {
 
 export interface UserAppData {
   entries: EntriesData
+  outOfOfficeData: OutOfOfficeData
   preferences?: {
     selectedDate?: string
     calendarView?: 'month' | 'week'
@@ -130,14 +131,21 @@ export const loadFromSupabase = async (
       }
     }
 
+    // Load out of office data
+    const outOfOfficeData = await loadOutOfOfficeData(supabase, clerkUserId)
+
     return {
       entries,
+      outOfOfficeData,
       preferences: profile?.preferences,
       supervisionHours
     }
   } catch (error) {
     console.error('Error loading from Supabase:', error)
-    return { entries: {} }
+    return { 
+      entries: {},
+      outOfOfficeData: {}
+    }
   }
 }
 
@@ -149,6 +157,12 @@ export const saveHourEntry = async (
   entry: HourEntry
 ): Promise<void> => {
   const userId = await ensureUserProfile(supabase, clerkUserId)
+
+  // Check if date is marked as out of office
+  const canAddHours = await canAddHoursToDate(supabase, clerkUserId, dateKey)
+  if (!canAddHours) {
+    throw new Error('Cannot add hours to a day marked as out of office')
+  }
 
   const { error } = await supabase
     .from('hour_entries')
@@ -242,7 +256,120 @@ export const deleteHourEntry = async (
   }
 }
 
+// Out of Office operations
 
+// Save out of office entry
+export const saveOutOfOfficeEntry = async (
+  supabase: SupabaseClient,
+  clerkUserId: string,
+  entry: OutOfOfficeEntry
+): Promise<void> => {
+  const userId = await ensureUserProfile(supabase, clerkUserId)
+
+  // First check if date has existing hour entries
+  const { data: existingHours, error: hoursCheckError } = await supabase
+    .from('hour_entries')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('entry_date', entry.date)
+    .limit(1)
+
+  if (hoursCheckError) {
+    throw hoursCheckError
+  }
+
+  if (existingHours && existingHours.length > 0) {
+    throw new Error('Cannot mark day as out of office when hours are already logged')
+  }
+
+  const { error } = await supabase
+    .from('out_of_office')
+    .insert({
+      user_id: userId,
+      date: entry.date,
+      reason: entry.reason,
+      notes: entry.notes || null
+    })
+
+  if (error) {
+    throw error
+  }
+}
+
+// Delete out of office entry
+export const deleteOutOfOfficeEntry = async (
+  supabase: SupabaseClient,
+  clerkUserId: string,
+  dateKey: string
+): Promise<void> => {
+  const userId = await ensureUserProfile(supabase, clerkUserId)
+
+  const { error } = await supabase
+    .from('out_of_office')
+    .delete()
+    .eq('user_id', userId)
+    .eq('date', dateKey)
+
+  if (error) {
+    throw error
+  }
+}
+
+// Load out of office data
+export const loadOutOfOfficeData = async (
+  supabase: SupabaseClient,
+  clerkUserId: string
+): Promise<OutOfOfficeData> => {
+  const userId = await ensureUserProfile(supabase, clerkUserId)
+
+  const { data, error } = await supabase
+    .from('out_of_office')
+    .select('*')
+    .eq('user_id', userId)
+
+  if (error) {
+    throw error
+  }
+
+  const outOfOfficeData: OutOfOfficeData = {}
+  if (data) {
+    data.forEach((entry: any) => {
+      outOfOfficeData[entry.date] = {
+        id: entry.id,
+        user_id: entry.user_id,
+        date: entry.date,
+        reason: entry.reason,
+        notes: entry.notes,
+        created_at: entry.created_at,
+        updated_at: entry.updated_at
+      }
+    })
+  }
+
+  return outOfOfficeData
+}
+
+// Validation function to check if date can accept hour entries
+export const canAddHoursToDate = async (
+  supabase: SupabaseClient,
+  clerkUserId: string,
+  dateKey: string
+): Promise<boolean> => {
+  const userId = await ensureUserProfile(supabase, clerkUserId)
+
+  const { data, error } = await supabase
+    .from('out_of_office')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('date', dateKey)
+    .limit(1)
+
+  if (error) {
+    throw error
+  }
+
+  return !data || data.length === 0
+}
 
 // Save user preferences to Supabase
 export const saveUserPreferences = async (

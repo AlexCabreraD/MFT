@@ -10,6 +10,20 @@ export interface HourEntry {
   deliveryFormat?: DeliveryFormat;
 }
 
+export interface OutOfOfficeEntry {
+  id?: number;
+  user_id?: string;
+  date: string; // YYYY-MM-DD format
+  reason: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface OutOfOfficeData {
+  [dateKey: string]: OutOfOfficeEntry;
+}
+
 export interface FormData {
   type: 'session' | 'supervision' | 'ce' | 'psychotherapy';
   subtype: string;
