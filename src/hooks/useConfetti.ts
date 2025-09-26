@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
 import confetti from 'canvas-confetti';
+import { useAppearancePreferences } from '@/contexts/AppearanceContext';
+import { confettiColorSchemes } from '@/lib/types/appearance';
 
 interface ConfettiOptions {
   particleCount?: number;
@@ -15,28 +17,32 @@ interface ConfettiOptions {
 }
 
 export const useConfetti = () => {
+  const { preferences } = useAppearancePreferences();
+
   const triggerSuccess = useCallback((options: ConfettiOptions = {}) => {
+    const colorScheme = confettiColorSchemes[preferences.confetti.style];
     const defaults = {
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'],
+      colors: colorScheme.colors,
       ...options
     };
 
     confetti(defaults);
-  }, []);
+  }, [preferences.confetti.style]);
 
   const triggerCelebration = useCallback(() => {
     // Multiple bursts for a more celebratory effect similar to Canvas
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
+    const colorScheme = confettiColorSchemes[preferences.confetti.style];
     const defaults = {
       startVelocity: 30,
       spread: 360,
       ticks: 60,
       zIndex: 0,
-      colors: ['#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#84CC16']
+      colors: colorScheme.colors
     };
 
     function randomInRange(min: number, max: number) {
@@ -64,14 +70,15 @@ export const useConfetti = () => {
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
       });
     }, 250);
-  }, []);
+  }, [preferences.confetti.style]);
 
   const triggerHourSubmission = useCallback(() => {
-    // Canvas-style success animation with vibrant colorful theme
+    // Canvas-style success animation with user's preferred colors
     const count = 200;
+    const colorScheme = confettiColorSchemes[preferences.confetti.style];
     const defaults = {
       origin: { y: 0.7 },
-      colors: ['#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#84CC16', '#F97316', '#EC4899']
+      colors: colorScheme.colors
     };
 
     function fire(particleRatio: number, opts: confetti.Options) {
@@ -109,7 +116,7 @@ export const useConfetti = () => {
       spread: 120,
       startVelocity: 45,
     });
-  }, []);
+  }, [preferences.confetti.style]);
 
   return {
     triggerSuccess,

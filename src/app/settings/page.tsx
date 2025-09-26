@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ArrowLeft, User, Calendar, Palette, Settings as SettingsIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PersonalEvents } from '@/components/settings/PersonalEvents';
+import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 
 type SettingsTab = 'personal-events' | 'appearance' | 'preferences' | 'account';
 
@@ -19,7 +20,7 @@ const settingsTabs = [
     label: 'Appearance',
     icon: Palette,
     description: 'Customize themes, colors, and fonts',
-    disabled: true
+    disabled: false
   },
   {
     id: 'preferences' as SettingsTab,
@@ -50,13 +51,7 @@ export default function SettingsPage() {
       case 'personal-events':
         return <PersonalEvents />;
       case 'appearance':
-        return (
-          <div className="text-center py-12">
-            <Palette className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Appearance Settings</h3>
-            <p className="text-gray-500">Coming soon! Customize themes, colors, and fonts.</p>
-          </div>
-        );
+        return <AppearanceSettings />;
       case 'preferences':
         return (
           <div className="text-center py-12">
@@ -124,7 +119,7 @@ export default function SettingsPage() {
                     <div>
                       <div className={`font-medium ${tab.disabled ? 'text-gray-400' : ''}`}>
                         {tab.label}
-                        {tab.disabled && <span className="ml-2 text-xs">(Coming Soon)</span>}
+                        {tab.disabled && <span className="ml-2 text-xs text-yellow-600">(Coming Soon)</span>}
                       </div>
                       <div className={`text-sm mt-1 ${
                         activeTab === tab.id ? 'text-pink-700' : 'text-gray-500'
