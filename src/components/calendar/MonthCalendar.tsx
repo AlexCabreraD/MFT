@@ -2,6 +2,7 @@ import { EntriesData, OutOfOfficeData } from '@/lib/types';
 import { formatDateKey, isToday, isSameDay } from '@/lib/utils/dateUtils';
 import { isFederalHoliday, getFederalHolidayName } from '@/lib/utils/federalHolidays';
 import { PersonalEvent, generateRecurringInstances } from '@/lib/utils/personalEvents';
+import { getEventBackgroundColor, getEventBorderColor } from '@/lib/utils/colorUtils';
 
 interface MonthCalendarProps {
   selectedDate: Date;
@@ -48,23 +49,6 @@ export const MonthCalendar = ({ selectedDate, entries, outOfOfficeData, personal
     // Get primary personal event color (for styling)
     const primaryPersonalEventColor = hasPersonalEvents ? personalEventInstances[0].color : null;
     
-    // Convert hex color to lighter background version
-    const getEventBackgroundColor = (color: string, opacity = 0.1) => {
-      // Convert hex to RGB and apply opacity
-      const hex = color.replace('#', '');
-      const r = parseInt(hex.substr(0, 2), 16);
-      const g = parseInt(hex.substr(2, 2), 16);
-      const b = parseInt(hex.substr(4, 2), 16);
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    };
-    
-    const getEventBorderColor = (color: string, opacity = 0.3) => {
-      const hex = color.replace('#', '');
-      const r = parseInt(hex.substr(0, 2), 16);
-      const g = parseInt(hex.substr(2, 2), 16);
-      const b = parseInt(hex.substr(4, 2), 16);
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    };
 
     days.push(
       <div

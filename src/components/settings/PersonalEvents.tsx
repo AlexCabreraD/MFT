@@ -43,6 +43,7 @@ export function PersonalEvents() {
     recurrence_interval: 1,
     color: eventColors[0].value
   });
+  const [intervalInputValue, setIntervalInputValue] = useState<string>('1');
 
   const loadEvents = useCallback(async () => {
     if (!user?.id) return;
@@ -71,7 +72,7 @@ export function PersonalEvents() {
         event_date: formData.event_date,
         event_type: formData.event_type,
         recurrence_type: formData.recurrence_type,
-        recurrence_interval: formData.recurrence_type !== 'none' ? formData.recurrence_interval : null,
+        recurrence_interval: formData.recurrence_type !== 'none' && formData.recurrence_type !== 'yearly' ? formData.recurrence_interval : null,
         color: formData.color,
         is_active: true
       };
@@ -88,7 +89,7 @@ export function PersonalEvents() {
         event_date: formData.event_date,
         event_type: formData.event_type,
         recurrence_type: formData.recurrence_type,
-        recurrence_interval: formData.recurrence_type !== 'none' ? formData.recurrence_interval : null,
+        recurrence_interval: formData.recurrence_type !== 'none' && formData.recurrence_type !== 'yearly' ? formData.recurrence_interval : null,
         color: formData.color,
         is_active: true
       };
@@ -103,15 +104,17 @@ export function PersonalEvents() {
 
   const handleEdit = (event: PersonalEvent) => {
     setEditingEvent(event);
+    const intervalValue = event.recurrence_interval || 1;
     setFormData({
       title: event.title,
       description: event.description || '',
       event_date: event.event_date,
       event_type: event.event_type,
       recurrence_type: event.recurrence_type,
-      recurrence_interval: event.recurrence_interval || 1,
+      recurrence_interval: intervalValue,
       color: event.color
     });
+    setIntervalInputValue(intervalValue.toString());
     setShowForm(true);
   };
 
@@ -136,6 +139,7 @@ export function PersonalEvents() {
       recurrence_interval: 1,
       color: eventColors[0].value
     });
+    setIntervalInputValue('1');
   };
 
   const formatDate = (dateString: string) => {
@@ -279,7 +283,7 @@ export function PersonalEvents() {
                   ))}
                 </select>
               </div>
-              {formData.recurrence_type !== 'none' && (
+              {formData.recurrence_type !== 'none' && formData.recurrence_type !== 'yearly' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Interval
@@ -288,8 +292,19 @@ export function PersonalEvents() {
                     type="number"
                     min="1"
                     max="365"
-                    value={formData.recurrence_interval}
-                    onChange={(e) => setFormData({ ...formData, recurrence_interval: parseInt(e.target.value) })}
+                    value={intervalInputValue}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setIntervalInputValue(value);
+                      const numValue = parseInt(value);
+                      setFormData({ ...formData, recurrence_interval: !isNaN(numValue) && numValue > 0 ? numValue : 1 });
+                    }}
+                    onBlur={() => {
+                      if (intervalInputValue === '' || parseInt(intervalInputValue) < 1) {
+                        setIntervalInputValue('1');
+                        setFormData({ ...formData, recurrence_interval: 1 });
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
@@ -364,6 +379,7 @@ export function PersonalEvents() {
           })
         )}
       </div>
+
     </div>
   );
 }

@@ -106,26 +106,21 @@ export async function getPersonalEvents(supabase: SupabaseClient<Database>, user
 }
 
 export async function updatePersonalEvent(supabase: SupabaseClient<Database>, id: string, updates: PersonalEventUpdate): Promise<PersonalEvent | null> {
-  console.log('Updating personal event with ID:', id);
-  console.log('Update data:', updates);
-  
   const { data, error } = await supabase
     .from('personal_events')
     .update({
       ...updates,
       updated_at: new Date().toISOString()
-    } as any)
+    })
     .eq('id', id)
     .select()
     .single();
 
   if (error) {
     console.error('Error updating personal event:', error);
-    console.error('Error details:', JSON.stringify(error, null, 2));
     return null;
   }
 
-  console.log('Update successful:', data);
   return data;
 }
 
