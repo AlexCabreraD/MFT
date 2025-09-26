@@ -1,4 +1,5 @@
 import { SupabaseClient, PostgrestError } from '@supabase/supabase-js';
+import { formatDateKey, parseDateString } from './dateUtils';
 
 // Direct type definitions to avoid Database interface inference issues
 export interface PersonalEvent {
@@ -7,7 +8,7 @@ export interface PersonalEvent {
   title: string;
   description: string | null;
   event_date: string;
-  event_type: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
+  event_type: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'payday' | 'custom';
   recurrence_type: 'none' | 'weekly' | 'monthly' | 'yearly';
   recurrence_interval: number | null;
   color: string;
@@ -22,7 +23,7 @@ export interface PersonalEventInsert {
   title: string;
   description?: string | null;
   event_date: string;
-  event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
+  event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'payday' | 'custom';
   recurrence_type?: 'none' | 'weekly' | 'monthly' | 'yearly';
   recurrence_interval?: number | null;
   color?: string;
@@ -37,7 +38,7 @@ export interface PersonalEventUpdate {
   title?: string;
   description?: string | null;
   event_date?: string;
-  event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
+  event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'payday' | 'custom';
   recurrence_type?: 'none' | 'weekly' | 'monthly' | 'yearly';
   recurrence_interval?: number | null;
   color?: string;
@@ -73,6 +74,7 @@ export const eventTypes = [
   { value: 'anniversary', label: 'Anniversary', icon: '💝' },
   { value: 'appointment', label: 'Appointment', icon: '📅' },
   { value: 'reminder', label: 'Reminder', icon: '⏰' },
+  { value: 'payday', label: 'Payday', icon: '💰' },
   { value: 'custom', label: 'Custom', icon: '⭐' }
 ];
 
@@ -200,9 +202,11 @@ export async function deletePersonalEvent(supabase: SupabaseClient, id: string):
 }
 
 export function generateRecurringInstances(event: PersonalEvent, year: number): RecurringEventInstance[] {
+  const baseDate = parseDateString(event.event_date);
+
   if (event.recurrence_type === 'none') {
-    const eventYear = new Date(event.event_date).getFullYear();
-    if (eventYear === year) {
+    // Only return the event if it's in the requested year
+    if (baseDate.getFullYear() === year) {
       return [{
         id: event.id,
         title: event.title,
@@ -218,86 +222,60 @@ export function generateRecurringInstances(event: PersonalEvent, year: number): 
   }
 
   const instances: RecurringEventInstance[] = [];
-  const baseDate = new Date(event.event_date);
   const interval = event.recurrence_interval || 1;
 
+  // Helper function to create instance object
+  const createInstance = (date: Date, instanceId: string) => ({
+    id: instanceId,
+    title: event.title,
+    description: event.description,
+    date: formatDateKey(date),
+    event_type: event.event_type,
+    color: event.color,
+    is_recurring: true,
+    base_event_id: event.id
+  });
+
   switch (event.recurrence_type) {
-    case 'yearly':
+    case 'yearly': {
       const yearlyDate = new Date(year, baseDate.getMonth(), baseDate.getDate());
       if (yearlyDate.getFullYear() === year) {
-        instances.push({
-          id: `${event.id}_${year}`,
-          title: event.title,
-          description: event.description,
-          date: formatDateToString(yearlyDate),
-          event_type: event.event_type,
-          color: event.color,
-          is_recurring: true,
-          base_event_id: event.id
-        });
+        instances.push(createInstance(yearlyDate, `${event.id}_${year}`));
       }
       break;
+    }
 
-    case 'monthly':
+    case 'monthly': {
       for (let month = 0; month < 12; month++) {
         if (month % interval === baseDate.getMonth() % interval) {
           const monthlyDate = new Date(year, month, baseDate.getDate());
           if (monthlyDate.getFullYear() === year && monthlyDate.getMonth() === month) {
-            instances.push({
-              id: `${event.id}_${year}_${month}`,
-              title: event.title,
-              description: event.description,
-              date: formatDateToString(monthlyDate),
-              event_type: event.event_type,
-              color: event.color,
-              is_recurring: true,
-              base_event_id: event.id
-            });
+            instances.push(createInstance(monthlyDate, `${event.id}_${year}_${month}`));
           }
         }
       }
       break;
+    }
 
-    case 'weekly':
+    case 'weekly': {
       const startOfYear = new Date(year, 0, 1);
       const endOfYear = new Date(year, 11, 31);
-      let currentDate = new Date(baseDate);
-      
+      const currentDate = new Date(baseDate);
+
       // Find first occurrence in the year
       while (currentDate < startOfYear) {
-        const newDate = new Date(currentDate);
-        newDate.setDate(newDate.getDate() + (7 * interval));
-        currentDate = newDate;
+        currentDate.setDate(currentDate.getDate() + (7 * interval));
       }
 
       while (currentDate <= endOfYear) {
         if (currentDate.getFullYear() === year) {
-          instances.push({
-            id: `${event.id}_${year}_${currentDate.getTime()}`,
-            title: event.title,
-            description: event.description,
-            date: formatDateToString(currentDate),
-            event_type: event.event_type,
-            color: event.color,
-            is_recurring: true,
-            base_event_id: event.id
-          });
+          instances.push(createInstance(new Date(currentDate), `${event.id}_${year}_${currentDate.getTime()}`));
         }
-        const nextDate = new Date(currentDate);
-        nextDate.setDate(nextDate.getDate() + (7 * interval));
-        currentDate = nextDate;
+        currentDate.setDate(currentDate.getDate() + (7 * interval));
       }
       break;
-
+    }
   }
 
   return instances;
-}
-
-
-function formatDateToString(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 }

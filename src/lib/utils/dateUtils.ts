@@ -5,6 +5,12 @@ export const formatDateKey = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
+// Parse a date string (YYYY-MM-DD) as local timezone to avoid timezone shifts
+export const parseDateString = (dateString: string): Date => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day); // month is 0-indexed in Date constructor
+};
+
 export const isToday = (date: Date): boolean => {
   return formatDateKey(date) === formatDateKey(new Date());
 };

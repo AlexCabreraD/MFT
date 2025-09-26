@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Calendar, Repeat } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import { useSupabaseClient } from '@/lib/hooks/useSupabaseClient';
+import { formatDateKey, parseDateString } from '@/lib/utils/dateUtils';
 import {
   PersonalEvent,
   PersonalEventInsert,
@@ -21,7 +22,7 @@ interface PersonalEventFormData {
   title: string;
   description: string;
   event_date: string;
-  event_type: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
+  event_type: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'payday' | 'custom';
   recurrence_type: 'none' | 'weekly' | 'monthly' | 'yearly';
   recurrence_interval: number;
   color: string;
@@ -64,12 +65,16 @@ export function PersonalEvents() {
     e.preventDefault();
     if (!user?.id) return;
 
+    // Convert the date input to ensure proper local timezone handling
+    const eventDate = new Date(formData.event_date + 'T00:00:00');
+    const formattedDate = formatDateKey(eventDate);
+
     if (editingEvent) {
       // For updates, don't include user_id since it shouldn't change
       const updateData: PersonalEventUpdate = {
         title: formData.title,
         description: formData.description || null,
-        event_date: formData.event_date,
+        event_date: formattedDate,
         event_type: formData.event_type,
         recurrence_type: formData.recurrence_type,
         recurrence_interval: formData.recurrence_type !== 'none' && formData.recurrence_type !== 'yearly' ? formData.recurrence_interval : null,
@@ -86,7 +91,7 @@ export function PersonalEvents() {
         user_id: user.id,
         title: formData.title,
         description: formData.description || null,
-        event_date: formData.event_date,
+        event_date: formattedDate,
         event_type: formData.event_type,
         recurrence_type: formData.recurrence_type,
         recurrence_interval: formData.recurrence_type !== 'none' && formData.recurrence_type !== 'yearly' ? formData.recurrence_interval : null,
@@ -143,7 +148,7 @@ export function PersonalEvents() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return parseDateString(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'

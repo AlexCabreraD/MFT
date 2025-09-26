@@ -20,7 +20,7 @@ export const useConfetti = () => {
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#EC4899', '#BE185D', '#F472B6', '#F9A8D4'],
+      colors: ['#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'],
       ...options
     };
 
@@ -31,12 +31,12 @@ export const useConfetti = () => {
     // Multiple bursts for a more celebratory effect similar to Canvas
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
-    const defaults = { 
-      startVelocity: 30, 
-      spread: 360, 
-      ticks: 60, 
+    const defaults = {
+      startVelocity: 30,
+      spread: 360,
+      ticks: 60,
       zIndex: 0,
-      colors: ['#EC4899', '#BE185D', '#F472B6', '#F9A8D4', '#FDF2F8']
+      colors: ['#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#84CC16']
     };
 
     function randomInRange(min: number, max: number) {
@@ -67,11 +67,11 @@ export const useConfetti = () => {
   }, []);
 
   const triggerHourSubmission = useCallback(() => {
-    // Canvas-style success animation with pink theme
+    // Canvas-style success animation with vibrant colorful theme
     const count = 200;
     const defaults = {
       origin: { y: 0.7 },
-      colors: ['#EC4899', '#BE185D', '#F472B6', '#F9A8D4', '#FDF2F8']
+      colors: ['#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#84CC16', '#F97316', '#EC4899']
     };
 
     function fire(particleRatio: number, opts: confetti.Options) {
