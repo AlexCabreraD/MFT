@@ -4,6 +4,7 @@ import { EntriesData, FormData, HourEntry, ProgressStats, OutOfOfficeData, UserS
 import { formatDateKey, isToday } from '@/lib/utils/dateUtils';
 import { calculateProgress } from '@/lib/utils/progressUtils';
 import { useSupabaseClient } from '@/lib/hooks/useSupabaseClient';
+import { useConfetti } from '@/hooks/useConfetti';
 import {
   loadFromSupabase,
   saveHourEntry,
@@ -32,6 +33,7 @@ interface ClerkMetadata {
 export const useSupabaseHourTracker = () => {
   const { user } = useUser();
   const supabase = useSupabaseClient();
+  const { triggerHourSubmission } = useConfetti();
   const [entries, setEntries] = useState<EntriesData>({});
   const [outOfOfficeData, setOutOfOfficeData] = useState<OutOfOfficeData>({});
   const [supervisionData, setSupervisionData] = useState<UserSupervisionData>();
@@ -194,6 +196,13 @@ export const useSupabaseHourTracker = () => {
         
         return newEntries;
       });
+
+      // Trigger confetti for new entries (not edits)
+      if (editingIndex === null) {
+        setTimeout(() => {
+          triggerHourSubmission();
+        }, 100); // Small delay to ensure UI has updated
+      }
 
       // Reset form
       setFormData(defaultFormData);
