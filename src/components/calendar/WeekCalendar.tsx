@@ -110,10 +110,7 @@ export const WeekCalendar = ({ selectedDate, entries, outOfOfficeData, personalE
         const holidayName = getFederalHolidayName(date);
         
         // Get personal events for this date
-        const year = date.getFullYear();
-        const personalEventInstances = personalEvents.flatMap(event => 
-          generateRecurringInstances(event, year)
-        ).filter(instance => instance.date === formatDateKey(date));
+        const personalEventInstances = getPersonalEventsForDate(personalEvents, date);
         
         const hasPersonalEvents = personalEventInstances.length > 0;
         

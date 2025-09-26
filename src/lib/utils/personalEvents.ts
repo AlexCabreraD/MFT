@@ -65,7 +65,8 @@ export async function createPersonalEvent(supabase: SupabaseClient<Database>, ev
 
   const { data, error } = await supabase
     .from('personal_events')
-    .insert(eventToInsert)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .insert(eventToInsert as any)
     .select()
     .single();
 
@@ -111,7 +112,8 @@ export async function updatePersonalEvent(supabase: SupabaseClient<Database>, id
     .update({
       ...updates,
       updated_at: new Date().toISOString()
-    })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
     .eq('id', id)
     .select()
     .single();
@@ -127,7 +129,11 @@ export async function updatePersonalEvent(supabase: SupabaseClient<Database>, id
 export async function deletePersonalEvent(supabase: SupabaseClient<Database>, id: string): Promise<boolean> {
   const { error } = await supabase
     .from('personal_events')
-    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .update({ 
+      is_active: false, 
+      updated_at: new Date().toISOString()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
     .eq('id', id);
 
   if (error) {
@@ -249,19 +255,6 @@ export function generateRecurringInstances(event: PersonalEvent, year: number): 
   return instances;
 }
 
-export function getPersonalEventsForDate(events: PersonalEvent[], date: Date): RecurringEventInstance[] {
-  const year = date.getFullYear();
-  const dateString = formatDateToString(date);
-  const allInstances: RecurringEventInstance[] = [];
-
-  events.forEach(event => {
-    const instances = generateRecurringInstances(event, year);
-    const matchingInstances = instances.filter(instance => instance.date === dateString);
-    allInstances.push(...matchingInstances);
-  });
-
-  return allInstances;
-}
 
 function formatDateToString(date: Date): string {
   const year = date.getFullYear();
