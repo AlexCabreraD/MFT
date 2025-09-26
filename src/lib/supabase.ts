@@ -96,7 +96,7 @@ export interface Database {
           description: string | null
           event_date: string
           event_type: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom'
-          recurrence_type: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+          recurrence_type: 'none' | 'weekly' | 'monthly' | 'yearly'
           recurrence_interval: number | null
           color: string
           is_active: boolean
@@ -110,7 +110,7 @@ export interface Database {
           description?: string | null
           event_date: string
           event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom'
-          recurrence_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+          recurrence_type?: 'none' | 'weekly' | 'monthly' | 'yearly'
           recurrence_interval?: number | null
           color?: string
           is_active?: boolean
@@ -124,7 +124,7 @@ export interface Database {
           description?: string | null
           event_date?: string
           event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom'
-          recurrence_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+          recurrence_type?: 'none' | 'weekly' | 'monthly' | 'yearly'
           recurrence_interval?: number | null
           color?: string
           is_active?: boolean

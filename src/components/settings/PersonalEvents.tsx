@@ -22,7 +22,7 @@ interface PersonalEventFormData {
   description: string;
   event_date: string;
   event_type: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
-  recurrence_type: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_type: 'none' | 'weekly' | 'monthly' | 'yearly';
   recurrence_interval: number;
   color: string;
 }
@@ -43,6 +43,7 @@ export function PersonalEvents() {
     recurrence_interval: 1,
     color: eventColors[0].value
   });
+  const [intervalDisplayValue, setIntervalDisplayValue] = useState<string>('1');
 
   const loadEvents = useCallback(async () => {
     if (!user?.id) return;
@@ -113,6 +114,7 @@ export function PersonalEvents() {
       recurrence_interval: intervalValue,
       color: event.color
     });
+    setIntervalDisplayValue(intervalValue.toString());
     setShowForm(true);
   };
 
@@ -137,6 +139,7 @@ export function PersonalEvents() {
       recurrence_interval: 1,
       color: eventColors[0].value
     });
+    setIntervalDisplayValue('1');
   };
 
   const formatDate = (dateString: string) => {
@@ -280,7 +283,7 @@ export function PersonalEvents() {
                   ))}
                 </select>
               </div>
-              {formData.recurrence_type !== 'none' && formData.recurrence_type !== 'yearly' && (
+              {formData.recurrence_type === 'weekly' || formData.recurrence_type === 'monthly' ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Interval
@@ -289,15 +292,23 @@ export function PersonalEvents() {
                     type="number"
                     min="1"
                     max="365"
-                    value={formData.recurrence_interval}
+                    value={intervalDisplayValue}
                     onChange={(e) => {
-                      const numValue = parseInt(e.target.value);
+                      const value = e.target.value;
+                      setIntervalDisplayValue(value);
+                      const numValue = parseInt(value);
                       setFormData({ ...formData, recurrence_interval: !isNaN(numValue) && numValue > 0 ? numValue : 1 });
+                    }}
+                    onBlur={() => {
+                      if (intervalDisplayValue === '' || parseInt(intervalDisplayValue) < 1) {
+                        setIntervalDisplayValue('1');
+                        setFormData({ ...formData, recurrence_interval: 1 });
+                      }
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
-              )}
+              ) : null}
             </div>
 
             <div className="flex gap-3 pt-4">

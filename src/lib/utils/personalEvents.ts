@@ -8,7 +8,7 @@ export interface PersonalEvent {
   description: string | null;
   event_date: string;
   event_type: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
-  recurrence_type: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_type: 'none' | 'weekly' | 'monthly' | 'yearly';
   recurrence_interval: number | null;
   color: string;
   is_active: boolean;
@@ -23,7 +23,7 @@ export interface PersonalEventInsert {
   description?: string | null;
   event_date: string;
   event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
-  recurrence_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_type?: 'none' | 'weekly' | 'monthly' | 'yearly';
   recurrence_interval?: number | null;
   color?: string;
   is_active?: boolean;
@@ -38,7 +38,7 @@ export interface PersonalEventUpdate {
   description?: string | null;
   event_date?: string;
   event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
-  recurrence_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_type?: 'none' | 'weekly' | 'monthly' | 'yearly';
   recurrence_interval?: number | null;
   color?: string;
   is_active?: boolean;
@@ -78,7 +78,6 @@ export const eventTypes = [
 
 export const recurrenceTypes = [
   { value: 'none', label: 'One-time' },
-  { value: 'daily', label: 'Daily' },
   { value: 'weekly', label: 'Weekly' },
   { value: 'monthly', label: 'Monthly' },
   { value: 'yearly', label: 'Yearly' }
@@ -266,7 +265,9 @@ export function generateRecurringInstances(event: PersonalEvent, year: number): 
       
       // Find first occurrence in the year
       while (currentDate < startOfYear) {
-        currentDate.setDate(currentDate.getDate() + (7 * interval));
+        const newDate = new Date(currentDate);
+        newDate.setDate(newDate.getDate() + (7 * interval));
+        currentDate = newDate;
       }
 
       while (currentDate <= endOfYear) {
@@ -282,30 +283,12 @@ export function generateRecurringInstances(event: PersonalEvent, year: number): 
             base_event_id: event.id
           });
         }
-        currentDate.setDate(currentDate.getDate() + (7 * interval));
+        const nextDate = new Date(currentDate);
+        nextDate.setDate(nextDate.getDate() + (7 * interval));
+        currentDate = nextDate;
       }
       break;
 
-    case 'daily':
-      // For daily events, limit to avoid performance issues
-      const startDate = new Date(Math.max(baseDate.getTime(), new Date(year, 0, 1).getTime()));
-      const endDate = new Date(year, 11, 31);
-      currentDate = new Date(startDate);
-
-      while (currentDate <= endDate && instances.length < 365) {
-        instances.push({
-          id: `${event.id}_${year}_${currentDate.getTime()}`,
-          title: event.title,
-          description: event.description,
-          date: formatDateToString(currentDate),
-          event_type: event.event_type,
-          color: event.color,
-          is_recurring: true,
-          base_event_id: event.id
-        });
-        currentDate.setDate(currentDate.getDate() + interval);
-      }
-      break;
   }
 
   return instances;
