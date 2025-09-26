@@ -1,9 +1,50 @@
-import { Database } from '@/lib/supabase';
 import { SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 
-export type PersonalEvent = Database['public']['Tables']['personal_events']['Row'];
-export type PersonalEventInsert = Database['public']['Tables']['personal_events']['Insert'];
-export type PersonalEventUpdate = Database['public']['Tables']['personal_events']['Update'];
+// Direct type definitions to avoid Database interface inference issues
+export interface PersonalEvent {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  event_type: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
+  recurrence_type: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_interval: number | null;
+  color: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PersonalEventInsert {
+  id?: string;
+  user_id: string;
+  title: string;
+  description?: string | null;
+  event_date: string;
+  event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
+  recurrence_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_interval?: number | null;
+  color?: string;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PersonalEventUpdate {
+  id?: string;
+  user_id?: string;
+  title?: string;
+  description?: string | null;
+  event_date?: string;
+  event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom';
+  recurrence_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_interval?: number | null;
+  color?: string;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export interface RecurringEventInstance {
   id: string;
@@ -43,7 +84,7 @@ export const recurrenceTypes = [
   { value: 'yearly', label: 'Yearly' }
 ];
 
-export async function createPersonalEvent(supabase: SupabaseClient<Database>, event: PersonalEventInsert): Promise<PersonalEvent | null> {
+export async function createPersonalEvent(supabase: SupabaseClient, event: PersonalEventInsert): Promise<PersonalEvent | null> {
   // First, get the user's UUID from user_profiles using their Clerk ID
   const { data: userProfile, error: profileError } = await supabase
     .from('user_profiles')
@@ -57,16 +98,22 @@ export async function createPersonalEvent(supabase: SupabaseClient<Database>, ev
   }
 
   const eventToInsert: PersonalEventInsert = {
-    ...event,
-    user_id: userProfile.id, // Use the UUID from user_profiles
+    title: event.title,
+    description: event.description,
+    event_date: event.event_date,
+    event_type: event.event_type,
+    recurrence_type: event.recurrence_type,
+    recurrence_interval: event.recurrence_interval,
+    color: event.color,
+    is_active: event.is_active,
+    user_id: userProfile.id,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   };
 
   const { data, error } = await supabase
     .from('personal_events')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .insert(eventToInsert as any)
+    .insert(eventToInsert)
     .select()
     .single();
 
@@ -78,7 +125,7 @@ export async function createPersonalEvent(supabase: SupabaseClient<Database>, ev
   return data;
 }
 
-export async function getPersonalEvents(supabase: SupabaseClient<Database>, userId: string): Promise<PersonalEvent[]> {
+export async function getPersonalEvents(supabase: SupabaseClient, userId: string): Promise<PersonalEvent[]> {
   // First, get the user's UUID from user_profiles using their Clerk ID
   const { data: userProfile, error: profileError } = await supabase
     .from('user_profiles')
@@ -106,14 +153,22 @@ export async function getPersonalEvents(supabase: SupabaseClient<Database>, user
   return data || [];
 }
 
-export async function updatePersonalEvent(supabase: SupabaseClient<Database>, id: string, updates: PersonalEventUpdate): Promise<PersonalEvent | null> {
+export async function updatePersonalEvent(supabase: SupabaseClient, id: string, updates: PersonalEventUpdate): Promise<PersonalEvent | null> {
+  const updateData: PersonalEventUpdate = {
+    title: updates.title,
+    description: updates.description,
+    event_date: updates.event_date,
+    event_type: updates.event_type,
+    recurrence_type: updates.recurrence_type,
+    recurrence_interval: updates.recurrence_interval,
+    color: updates.color,
+    is_active: updates.is_active,
+    updated_at: new Date().toISOString()
+  };
+
   const { data, error } = await supabase
     .from('personal_events')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    .update(updateData)
     .eq('id', id)
     .select()
     .single();
@@ -126,14 +181,15 @@ export async function updatePersonalEvent(supabase: SupabaseClient<Database>, id
   return data;
 }
 
-export async function deletePersonalEvent(supabase: SupabaseClient<Database>, id: string): Promise<boolean> {
+export async function deletePersonalEvent(supabase: SupabaseClient, id: string): Promise<boolean> {
+  const updateData: PersonalEventUpdate = { 
+    is_active: false, 
+    updated_at: new Date().toISOString()
+  };
+
   const { error } = await supabase
     .from('personal_events')
-    .update({ 
-      is_active: false, 
-      updated_at: new Date().toISOString()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+    .update(updateData)
     .eq('id', id);
 
   if (error) {
