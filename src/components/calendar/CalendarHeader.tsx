@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import { CalendarViewType } from '@/lib/types';
 
 interface CalendarHeaderProps {
@@ -7,6 +7,7 @@ interface CalendarHeaderProps {
   onDateChange: (date: Date) => void;
   onViewChange: (view: CalendarViewType) => void;
   onTodayClick: () => void;
+  onSettingsClick?: () => void;
 }
 
 export const CalendarHeader = ({ 
@@ -14,7 +15,8 @@ export const CalendarHeader = ({
   calendarView, 
   onDateChange, 
   onViewChange, 
-  onTodayClick 
+  onTodayClick,
+  onSettingsClick
 }: CalendarHeaderProps) => {
   const handlePrevious = () => {
     const newDate = new Date(selectedDate);
@@ -97,6 +99,15 @@ export const CalendarHeader = ({
           >
             Today
           </button>
+          {onSettingsClick && (
+            <button
+              onClick={onSettingsClick}
+              className="p-2 hover:bg-pink-100 rounded transition-colors cursor-pointer"
+              title="Settings"
+            >
+              <Settings className="w-4 h-4 text-pink-600" />
+            </button>
+          )}
         </div>
       </div>
     </div>

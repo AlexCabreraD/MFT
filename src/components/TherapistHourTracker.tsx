@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Flower2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { ViewType, CalendarViewType } from '@/lib/types';
+import { PersonalEvent, getPersonalEvents } from '@/lib/utils/personalEvents';
+import { useSupabaseClient } from '@/lib/hooks/useSupabaseClient';
+import { useUser } from '@clerk/nextjs';
 import { useSupabaseHourTracker } from '@/lib/hooks/useSupabaseHourTracker';
 import { Header } from './layout/Header';
 import { QuickStats } from './layout/QuickStats';
@@ -18,6 +22,10 @@ import { RequirementsView } from './requirements/RequirementsView';
 export const TherapistHourTracker = () => {
   const [view, setView] = useState<ViewType>('calendar');
   const [calendarView, setCalendarView] = useState<CalendarViewType>('month');
+  const [personalEvents, setPersonalEvents] = useState<PersonalEvent[]>([]);
+  const router = useRouter();
+  const supabase = useSupabaseClient();
+  const { user } = useUser();
   
   const {
     entries,
@@ -48,6 +56,21 @@ export const TherapistHourTracker = () => {
     setSelectedDate(new Date());
   };
 
+  const handleSettingsClick = () => {
+    router.push('/settings');
+  };
+
+  // Load personal events
+  useEffect(() => {
+    if (user?.id) {
+      const loadPersonalEvents = async () => {
+        const events = await getPersonalEvents(supabase, user.id);
+        setPersonalEvents(events);
+      };
+      loadPersonalEvents();
+    }
+  }, [user?.id, supabase]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
       {/* Decorative Elements */}
@@ -72,6 +95,7 @@ export const TherapistHourTracker = () => {
                   onDateChange={setSelectedDate}
                   onViewChange={setCalendarView}
                   onTodayClick={handleTodayClick}
+                  onSettingsClick={handleSettingsClick}
                 />
 
                 {/* Calendar Grid */}
@@ -81,6 +105,7 @@ export const TherapistHourTracker = () => {
                       selectedDate={selectedDate}
                       entries={entries}
                       outOfOfficeData={outOfOfficeData}
+                      personalEvents={personalEvents}
                       onDateSelect={setSelectedDate}
                     />
                   ) : (
@@ -88,6 +113,7 @@ export const TherapistHourTracker = () => {
                       selectedDate={selectedDate}
                       entries={entries}
                       outOfOfficeData={outOfOfficeData}
+                      personalEvents={personalEvents}
                       onDateSelect={setSelectedDate}
                     />
                   )}

@@ -88,6 +88,50 @@ export interface Database {
           updated_at?: string
         }
       }
+      personal_events: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          description: string | null
+          event_date: string
+          event_type: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom'
+          recurrence_type: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+          recurrence_interval: number | null
+          color: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          description?: string | null
+          event_date: string
+          event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom'
+          recurrence_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+          recurrence_interval?: number | null
+          color?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          description?: string | null
+          event_date?: string
+          event_type?: 'birthday' | 'anniversary' | 'appointment' | 'reminder' | 'custom'
+          recurrence_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+          recurrence_interval?: number | null
+          color?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
