@@ -43,7 +43,6 @@ export function PersonalEvents() {
     recurrence_interval: 1,
     color: eventColors[0].value
   });
-  const [intervalInputValue, setIntervalInputValue] = useState<string>('1');
 
   const loadEvents = useCallback(async () => {
     if (!user?.id) return;
@@ -114,7 +113,6 @@ export function PersonalEvents() {
       recurrence_interval: intervalValue,
       color: event.color
     });
-    setIntervalInputValue(intervalValue.toString());
     setShowForm(true);
   };
 
@@ -139,7 +137,6 @@ export function PersonalEvents() {
       recurrence_interval: 1,
       color: eventColors[0].value
     });
-    setIntervalInputValue('1');
   };
 
   const formatDate = (dateString: string) => {
@@ -292,18 +289,10 @@ export function PersonalEvents() {
                     type="number"
                     min="1"
                     max="365"
-                    value={intervalInputValue}
+                    value={formData.recurrence_interval}
                     onChange={(e) => {
-                      const value = e.target.value;
-                      setIntervalInputValue(value);
-                      const numValue = parseInt(value);
+                      const numValue = parseInt(e.target.value);
                       setFormData({ ...formData, recurrence_interval: !isNaN(numValue) && numValue > 0 ? numValue : 1 });
-                    }}
-                    onBlur={() => {
-                      if (intervalInputValue === '' || parseInt(intervalInputValue) < 1) {
-                        setIntervalInputValue('1');
-                        setFormData({ ...formData, recurrence_interval: 1 });
-                      }
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />

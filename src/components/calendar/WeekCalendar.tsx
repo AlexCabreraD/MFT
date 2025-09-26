@@ -1,8 +1,9 @@
 import { EntriesData, OutOfOfficeData } from '@/lib/types';
 import { formatDateKey, isToday, isSameDay } from '@/lib/utils/dateUtils';
 import { isFederalHoliday, getFederalHolidayName } from '@/lib/utils/federalHolidays';
-import { PersonalEvent, generateRecurringInstances } from '@/lib/utils/personalEvents';
+import { PersonalEvent } from '@/lib/utils/personalEvents';
 import { getEventBackgroundColor, getEventBorderColor } from '@/lib/utils/colorUtils';
+import { getPersonalEventsForDate } from '@/lib/utils/calendarUtils';
 import { Clock, TrendingUp, Target, AlertCircle } from 'lucide-react';
 
 interface WeekCalendarProps {

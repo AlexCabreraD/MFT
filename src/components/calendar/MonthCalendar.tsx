@@ -1,8 +1,9 @@
 import { EntriesData, OutOfOfficeData } from '@/lib/types';
 import { formatDateKey, isToday, isSameDay } from '@/lib/utils/dateUtils';
 import { isFederalHoliday, getFederalHolidayName } from '@/lib/utils/federalHolidays';
-import { PersonalEvent, generateRecurringInstances } from '@/lib/utils/personalEvents';
+import { PersonalEvent } from '@/lib/utils/personalEvents';
 import { getEventBackgroundColor, getEventBorderColor } from '@/lib/utils/colorUtils';
+import { getPersonalEventsForDate } from '@/lib/utils/calendarUtils';
 
 interface MonthCalendarProps {
   selectedDate: Date;
@@ -40,9 +41,7 @@ export const MonthCalendar = ({ selectedDate, entries, outOfOfficeData, personal
     const holidayName = getFederalHolidayName(date);
     
     // Get personal events for this date
-    const personalEventInstances = personalEvents.flatMap(event => 
-      generateRecurringInstances(event, year)
-    ).filter(instance => instance.date === formatDateKey(date));
+    const personalEventInstances = getPersonalEventsForDate(personalEvents, date);
     
     const hasPersonalEvents = personalEventInstances.length > 0;
     
